@@ -1,10 +1,11 @@
 <script>
 import ModelList from './components/ModelList.vue'
-
+import ForecastCalendar from './components/ForecastCalendar.vue'
 export default {
   name: 'App',
   components: {
-    ModelList
+    ModelList,
+    ForecastCalendar
   }
 }
 </script>
@@ -13,6 +14,7 @@ export default {
   <div id="app">
     <h1>GIM-карты: Список моделей</h1>
     <ModelList />
+    <ForecastCalendar/>
   </div>
 </template>
 

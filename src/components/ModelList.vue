@@ -28,7 +28,8 @@ export default {
       selected: ''
     }
   },
-  mounted() {
+  methods: {
+  loadModels() {
     axios.get('https://services.simurg.space/gim-tec-forecast/models')
       .then(res => {
         this.models = Array.isArray(res.data) ? res.data : (res.data.models || [])
@@ -40,8 +41,31 @@ export default {
       .finally(() => {
         this.loading = false
       })
+    },
+    refresh_forecasts(modelCode) {
+      // а) Загрузка прогнозов
+        axios.get(`https://services.simurg.space/gim-tec-forecast/get_forecasts/${modelCode}`)
+          .then(res => {
+            this.forecasts = res.data
+            console.log(modelCode,res.data)
+          })
+        
+    }
+  },
+
+  mounted() {
+    this.loadModels()
+  },
+
+  watch: {
+    selected(newModel) {
+      if (newModel) {
+        this.refresh_forecasts(newModel)
+      }
+    }
   }
 }
+
 </script>
 
 <style scoped>
