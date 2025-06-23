@@ -1,26 +1,14 @@
 <template>
-  <div>
-    <h2>Список моделей</h2>
-    <div v-if="loading">Загрузка...</div>
-    <div v-else-if="error" style="color: red">Ошибка: {{ error }}</div>
-    <div v-else>
-      <select v-model="selectedModel" style="min-width: 250px;" :disabled="loadingForecasts">
-        <option value="" disabled>Выберите модель...</option>
+  <div class="model-list-container">
+    <h2>Доступные модели</h2>
+    <div class="select-wrapper">
+      <select v-model="selectedModel">
+        <option value="" disabled>Выберите модель</option>
         <option v-for="model in models" :key="model" :value="model">{{ model }}</option>
       </select>
-      
-      <div v-if="selectedModel" style="margin-top: 1rem;">
-        <strong>Выбрана модель:</strong> {{ selectedModel }}
-        <div v-if="loadingForecasts" style="margin-top: 0.5rem; color: #666;">
-          Загрузка прогнозов...
-        </div>
-        <div v-else-if="forecasts.length > 0" style="margin-top: 0.5rem; color: #28a745;">
-          Найдено прогнозов: {{ forecasts.length }}
-        </div>
-        <div v-else-if="!loadingForecasts" style="margin-top: 0.5rem; color: #666;">
-          Прогнозы не найдены для выбранной модели.
-        </div>
-      </div>
+    </div>
+    <div v-if="selectedModel" class="forecast-count">
+      {{ forecastCountText }}
     </div>
   </div>
 </template>
@@ -35,63 +23,30 @@ export default {
   data() {
     return {
       models: [],
-      loading: true,
-      loadingForecasts: false,
-      error: null,
       selectedModel: '',
       forecasts: []
     }
   },
   
   methods: {
-    // Загрузка списка моделей
     async loadModels() {
-      try {
-        const res = await axios.get('https://services.simurg.space/gim-tec-forecast/models');
-        this.models = Array.isArray(res.data) ? res.data : (res.data.models || []);
-        
-        // Автоматически выбираем первую модель
-        if (this.models.length > 0) {
-          this.selectedModel = this.models[0];
-        }
-      } catch (err) {
-        this.error = err.message;
-      } finally {
-        this.loading = false;
+      const res = await axios.get('https://services.simurg.space/gim-tec-forecast/models');
+      this.models = Array.isArray(res.data) ? res.data : (res.data.models || []);
+      if (this.models.length > 0) {
+        this.selectedModel = this.models[0];
       }
     },
-    
-    // Загрузка прогнозов для выбранной модели
     async refresh_forecasts(modelCode) {
       if (!modelCode) return;
-      
-      this.loadingForecasts = true;
       this.forecasts = [];
-      
       try {
-        console.log(`Загружаем прогнозы для модели: ${modelCode}`);
-        
         const res = await axios.get(`https://services.simurg.space/gim-tec-forecast/get_forecasts/${modelCode}`);
-        
-        // Доступные прогнозы модели
         this.forecasts = Array.isArray(res.data) ? res.data : [];
-        
-        console.log(`Получено прогнозов: ${this.forecasts.length}`, this.forecasts);
-        
-        // Эмитим события только после успешной загрузки
         this.$emit('selected-model', modelCode);
         this.$emit('model-forecasts', this.forecasts);
-        
       } catch (err) {
-        console.error('Ошибка загрузки прогнозов:', err);
-        this.error = `Ошибка загрузки прогнозов: ${err.message}`;
-        this.forecasts = [];
-        
-        // Все равно эмитим события, чтобы компонент знал о состоянии
         this.$emit('selected-model', modelCode);
         this.$emit('model-forecasts', []);
-      } finally {
-        this.loadingForecasts = false;
       }
     }
   },
@@ -104,27 +59,42 @@ export default {
     selectedModel: {
       handler(newModel) {
         if (newModel) {
-          // Запускаем загрузку прогнозов
           this.refresh_forecasts(newModel);
         }
       },
       immediate: true
+    }
+  },
+
+  computed: {
+    forecastCountText() {
+      if (this.forecasts.length > 0) {
+        return `Найдено прогнозов: ${this.forecasts.length}`;
+      }
+      return 'Прогнозы для модели не найдены.';
     }
   }
 }
 </script>
 
 <style scoped>
-select {
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
-  border-radius: 6px;
-  border: 1px solid #ccc;
+.model-list-container {
+  width: 100%;
 }
-
-select:disabled {
-  background-color: #f8f9fa;
-  color: #6c757d;
-  cursor: not-allowed;
+.select-wrapper {
+  position: relative;
+}
+select {
+  width: 100%;
+  padding: 10px;
+  font-size: 1rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background-color: white;
+}
+.forecast-count {
+  margin-top: 10px;
+  font-size: 0.85rem;
+  color: #78818b;
 }
 </style>
