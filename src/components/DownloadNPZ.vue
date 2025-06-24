@@ -80,31 +80,60 @@ export default {
 
 <style scoped>
 .download-npz {
-  margin-top: 20px;
-  display: flex;
-  justify-content: flex-start;
+  display: block;
+  width: 100%;
+  max-width: none;
+  margin: 16px 0 0 0;
+  box-sizing: border-box;
+  padding: 0;
+  animation: slideUp 0.3s ease-out;
 }
+
 .download-btn {
-  padding: 10px 20px;
-  font-size: 1rem;
-  color: #333;
-  background-color: #f0f2f5;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  display: block;
+  padding: var(--spacing-md, 16px) var(--spacing-lg, 20px);
+  font-size: var(--font-size-md, 1rem);
+  color: var(--text-color, #333);
+  background-color: #e4e9eb;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
 }
+
 .download-btn:hover:not(:disabled) {
-  background-color: #e3e8ee;
+  background-color: var(--primary-color, #007bff);
+  color: white;
+  border-color: var(--primary-color, #007bff);
+  transform: translateY(-1px);
 }
+
+.download-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
 .download-btn:disabled {
   background-color: #f8f9fa;
   color: #aaa;
   cursor: not-allowed;
+  border-color: #eee;
+  transform: none;
 }
+
 .btn-content {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--spacing-sm, 12px);
+  justify-content: center;
 }
+
 .btn-spinner {
   width: 20px;
   height: 20px;
@@ -112,20 +141,126 @@ export default {
   border-radius: 50%;
   border-top-color: #fff;
   animation: spin 0.8s ease-in-out infinite;
+  will-change: transform;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
 
-/* Адаптивность */
-@media (max-width: 768px) {
-  .download-btn {
-    width: 100%;
-    font-size: 14px;
-    padding: 10px 16px;
+@keyframes spin { 
+  to { transform: rotate(360deg); } 
+}
+
+/* Адаптивность для планшетов */
+@media (max-width: 1024px) {
+  .download-npz {
+    margin-top: var(--spacing-md, 16px);
+    padding: 0 var(--spacing-xs, 8px);
   }
   
-  .download-npz {
-    margin-top: 15px;
-    padding: 12px;
+  .download-btn {
+    padding: var(--spacing-sm, 12px) var(--spacing-md, 16px);
+    font-size: var(--font-size-sm, 0.875rem);
+    min-height: 44px;
   }
+  
+  .btn-content {
+    gap: var(--spacing-xs, 8px);
+  }
+  
+  .btn-spinner {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+  .download-npz {
+    margin: 12px 0 0 0;
+  }
+  .download-btn {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    display: block;
+    font-size: var(--font-size-sm, 0.875rem);
+    padding: var(--spacing-md, 16px) var(--spacing-sm, 12px);
+    min-height: 48px;
+  }
+  
+  .btn-content {
+    gap: var(--spacing-xs, 8px);
+  }
+  
+  .btn-spinner {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* Адаптивность для очень маленьких экранов */
+@media (max-width: 480px) {
+  .download-npz {
+    margin-top: var(--spacing-xs, 8px);
+    padding: 0 var(--spacing-xs, 8px);
+  }
+  
+  .download-btn {
+    font-size: var(--font-size-xs, 0.75rem);
+    padding: var(--spacing-sm, 12px) var(--spacing-xs, 8px);
+    min-height: 44px;
+  }
+  
+  .btn-content {
+    gap: var(--spacing-xs, 8px);
+  }
+  
+  .btn-spinner {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* Улучшения для touch-устройств */
+@media (hover: none) and (pointer: coarse) {
+  .download-btn {
+    min-height: 48px;
+    border-width: 2px;
+  }
+  
+  .download-btn:hover:not(:disabled) {
+    transform: none;
+  }
+  
+  .download-btn:active:not(:disabled) {
+    background-color: var(--primary-color, #007bff);
+    color: white;
+    transform: scale(0.98);
+  }
+}
+
+/* Анимации для плавного появления */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Улучшения для фокуса */
+.download-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+.download-btn:focus:not(:focus-visible) {
+  box-shadow: var(--shadow, 0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+/* Улучшения для медленных соединений */
+.download-btn {
+  will-change: transform, box-shadow;
 }
 </style>

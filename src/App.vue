@@ -61,6 +61,11 @@
             @image-error="onImageError"
           />
           <DownloadNPZ :forecast-id="selectedForecast?.id"/>
+          <Metrics 
+            v-if="selectedModel && selectedDate" 
+            :selectedModel="selectedModel"
+            :selectedDate="selectedDate"
+          />
         </div>
       </template>
       
@@ -76,6 +81,7 @@ import ModelList from './components/ModelList.vue'
 import ForecastCalendar from './components/ForecastCalendar.vue'
 import ImageViewer from './components/ImageViewer.vue';
 import DownloadNPZ from './components/DownloadNPZ.vue';
+import Metrics from './components/Metrics.vue';
 
 export default {
   name: 'App',
@@ -83,7 +89,8 @@ export default {
     ModelList,
     ForecastCalendar,
     ImageViewer,
-    DownloadNPZ
+    DownloadNPZ,
+    Metrics
   }, 
 
   data() {
@@ -92,6 +99,7 @@ export default {
       forecasts: [],
       selectedModel: null,
       selectedForecast: null,
+      selectedDate: '',
       isPanelLoading: false,
       error: null,
       currentShiftInfo: null,
@@ -128,10 +136,12 @@ export default {
     onModelForecasts(modelForecasts) {
       this.forecasts = modelForecasts;
       this.selectedForecast = null;
+      this.selectedDate = '';
     },
     
     onForecastSelected(forecast) {
       this.selectedForecast = forecast;
+      this.selectedDate = forecast.forecast_start_date;
     },
 
     onImageLoaded() {
@@ -179,197 +189,189 @@ export default {
 </script>
 
 <style>
+/* CSS переменные для адаптивности */
+:root {
+  --primary-color: #007bff;
+  --border-color: #ddd;
+  --text-color: #333;
+  --background-color: #f9f9f9;
+  --panel-background: #ffffff;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --border-radius: 8px;
+  --spacing-xs: 8px;
+  --spacing-sm: 12px;
+  --spacing-md: 16px;
+  --spacing-lg: 20px;
+  --spacing-xl: 24px;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  line-height: 1.6;
+  color: var(--text-color);
+  background-color: #f5f5f5;
+}
+
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  margin: 2rem auto;
   max-width: 1200px;
-  padding: 0 20px;
+  margin: 40px auto 0 auto;
+  padding: 0 16px;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 100vh;
+  background: #f5f5f5;
 }
 
 .main-layout {
   display: flex;
-  gap: 20px;
+  gap: var(--spacing-lg);
   align-items: flex-start;
+  width: 100%;
+  box-sizing: border-box;
+  flex-direction: row;
 }
 
 .left-panel {
-  flex: 1;
-  min-width: 350px; /* Adjust as needed */
+  flex: 1 1 320px;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--spacing-lg);
+  position: relative;
+  z-index: 1;
 }
 
 .right-panel {
-  flex: 2;
-  min-width: 650px; /* Минимальная ширина, чтобы избежать сжатия */
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 20px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 20px;
   position: relative;
-  height: 750px; /* Фиксированная высота */
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 20px;
-  background-color: #f9f9f9;
-  color: #333;
-  display: flex; /* Включаем flex-контейнер */
-  flex-direction: column; /* Располагаем элементы в колонку */
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
 }
 
 .viewer-area {
-  flex-grow: 1; /* Занимает всё доступное пространство */
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  justify-content: center; /* Центрируем контент */
-  align-items: center;
-  min-height: 0; /* Важно для правильной работы flex-grow */
-  gap: 15px;
-}
-
-.forecast-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  padding: 15px;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  background-color: #ffffff;
-}
-
-.forecast-info p {
+  align-items: stretch;
+  gap: 16px;
   margin: 0;
-  color: #333;
+  padding: 0;
 }
 
-.forecast-info strong {
-  margin-right: 8px;
-  color: #333;
-  font-weight: 600;
+.forecast-header {
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
 }
 
 .forecast-header h2 {
-  margin-bottom: 10px;
+  margin: 0;
+  font-size: var(--font-size-2xl);
+  color: var(--text-color);
 }
 
 .forecast-info {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  padding: 15px;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  background-color: #ffffff;
+  padding: var(--spacing-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background-color: var(--background-color);
+  gap: var(--spacing-md);
+  margin: 0 auto;
+  flex-wrap: wrap;
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 .forecast-info p {
   margin: 0;
-  color: #333;
+  color: var(--text-color);
+  font-size: var(--font-size-sm);
 }
 
 .forecast-info strong {
-  margin-right: 8px;
-  color: #333;
+  color: var(--text-color);
   font-weight: 600;
 }
 
-.viewer-area {
-  flex-grow: 1; /* Занимает всё доступное пространство */
-  display: flex;
-  flex-direction: column;
-  justify-content: center; /* Центрируем контент */
-  align-items: center;
-  min-height: 0; /* Важно для правильной работы flex-grow */
-  gap: 15px;
-}
-
-.forecast-info h3 {
-  margin-top: 0;
-  margin-bottom: 10px;
-  font-size: 1.1rem;
-}
-
-.forecast-details p {
-  margin: 5px 0;
-  font-size: 0.9rem;
-}
-
-.shift-selector {
+.image-controls {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--spacing-xs);
   flex-wrap: wrap;
-  margin-bottom: 20px;
-  padding: 10px;
-  background-color: #f0f0f0;
-  border-radius: 6px;
 }
 
-.shift-selector label {
-  font-weight: bold;
-  color: #555;
+.image-controls label {
+  font-weight: 600;
+  font-size: var(--font-size-sm);
 }
 
-.shift-selector select {
-  padding: 8px 12px;
-  border: 1px solid #ddd;
+.image-controls select {
+  padding: var(--spacing-xs);
   border-radius: 4px;
-  background: white;
-  font-size: 14px;
-  color: #333;
+  border: 1px solid var(--border-color);
+  min-width: 120px;
+  font-size: var(--font-size-sm);
+  background-color: white;
 }
 
-.shift-info {
-  font-size: 12px;
-  color: #666;
+.total-maps-info {
+  margin: 0;
+  font-size: var(--font-size-sm);
 }
 
-.no-forecast {
+.no-forecast-selected {
+  text-align: center;
+  color: #777;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 300px;
-  text-align: center;
-  color: #666;
+  font-size: var(--font-size-lg);
 }
 
-.error-message {
-  text-align: center;
-  color: #dc3545;
-  padding: 20px;
-}
-
-.retry-btn {
-  padding: 8px 16px;
-  background: #007bff;
-  color: white;
-  border: none;
+.error-display {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
   border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background 0.2s;
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  text-align: center;
+  width: 100%;
 }
 
-.retry-btn:hover {
-  background: #0056b3;
-}
-
-/* Адаптивность */
-@media (max-width: 992px) {
-  .main-layout {
-    flex-direction: column;
-  }
-  
-  .left-panel {
-    width: 100%;
-    min-width: unset;
-  }
-}
-
-@media (max-width: 768px) {
-  #app {
-    margin: 1rem auto;
-    padding: 0 10px;
-  }
+.error-display p {
+  margin: 0;
+  font-size: var(--font-size-sm);
 }
 
 .right-panel-loading-overlay {
@@ -378,23 +380,24 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: rgba(255, 255, 255, 0.9);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   z-index: 20;
   backdrop-filter: blur(3px);
+  border-radius: var(--border-radius);
 }
 
 .spinner {
   width: 40px;
   height: 40px;
   border: 4px solid #f3f3f3;
-  border-top: 4px solid #007bff;
+  border-top: 4px solid var(--primary-color);
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  margin: 0 auto 15px;
+  margin: 0 auto var(--spacing-md);
 }
 
 @keyframes spin {
@@ -402,56 +405,96 @@ export default {
   100% { transform: rotate(360deg); }
 }
 
-.forecast-header h2 {
-  margin-bottom: 10px;
+@media (max-width: 1024px) {
+  #app {
+    padding: 0 4px;
+    margin-top: 24px;
+  }
+  .main-layout {
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+  .left-panel, .right-panel {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    position: static;
+    padding: 0;
+  }
 }
 
-.forecast-info {
-  display: flex;
-  gap: 20px;
-  font-size: 0.9rem;
-  color: #666;
+@media (max-width: 768px) {
+  #app {
+    padding: 0 2px;
+    margin-top: 12px;
+  }
+  .main-layout {
+    gap: var(--spacing-sm);
+  }
+  .right-panel {
+    padding: 12px 2px;
+  }
 }
 
-.no-forecast-selected {
-  text-align: center;
-  color: #777;
-  height: 100%; /* Растягиваем на всю высоту .viewer-area */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  box-sizing: border-box;
+  margin: 0 0 16px 0;
+}
+.metrics-table {
+  min-width: 700px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.metrics-table th,
+.metrics-table td {
+  white-space: nowrap;
+  padding: 8px 12px;
+  text-align: left;
 }
 
-.error-display {
-  background-color: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
-  border-radius: 4px;
-  padding: 15px;
-  margin-bottom: 20px;
-  text-align: center;
+/* Стили для компонентов */
+:deep(.download-npz),
+:deep(.download-npz *) {
+  max-width: 600px !important;
+  width: 100% !important;
+  box-sizing: border-box;
+  margin: 0 auto;
 }
 
-.error-display p {
-  margin: 0;
+.forecast-header,
+.forecast-info,
+.viewer-area > .image-viewer,
+:deep(.download-npz) {
+  max-width: 600px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
-.image-controls {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.image-controls label {
-  font-weight: 600;
-}
-.image-controls .select-wrapper {
-  max-width: 150px;
-}
-.image-controls select {
-  padding: 8px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-  min-width: 120px; /* Чтобы селект не был слишком узким */
+/* Улучшения для touch-устройств */
+@media (hover: none) and (pointer: coarse) {
+  .image-controls select {
+    min-height: 44px; /* Минимальная высота для touch */
+  }
+  
+  .forecast-info {
+    gap: var(--spacing-md);
+  }
 }
 
-.total-maps-info {
-  color: #333;
+.download-npz {
+  width: 100%;
+  margin: 16px 0 0 0;
+  box-sizing: border-box;
+  padding: 0;
+  display: block;
+}
+.download-btn {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  display: block;
 }
 </style>

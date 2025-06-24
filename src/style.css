@@ -1,13 +1,54 @@
+/* CSS переменные для адаптивного дизайна */
 :root {
-  --primary-color: #42b983;
-  --primary-hover-color: #36a372;
-  --text-color: #2c3e50;
-  --background-color: #f0f2f5;
-  --card-background-color: #ffffff;
-  --border-color: #e3e8ee;
-  --error-color: #d9534f;
-  --success-color: #5cb85c;
-  --font-family: 'Inter', sans-serif;
+  --primary-color: #007bff;
+  --primary-hover-color: #0056b3;
+  --text-color: #333;
+  --background-color: #f5f5f5;
+  --panel-background: #ffffff;
+  --border-color: #ddd;
+  --error-color: #dc3545;
+  --success-color: #28a745;
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  
+  /* Spacing variables */
+  --spacing-xs: 8px;
+  --spacing-sm: 12px;
+  --spacing-md: 16px;
+  --spacing-lg: 20px;
+  --spacing-xl: 24px;
+  
+  /* Font size variables */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  
+  /* Border radius variables */
+  --border-radius: 8px;
+  --border-radius-sm: 4px;
+  --border-radius-lg: 12px;
+  
+  /* Shadow variables */
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.15);
+  
+  /* Transition variables */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.2s ease;
+  --transition-slow: 0.3s ease;
+}
+
+/* Reset and base styles */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  line-height: 1.6;
 }
 
 body {
@@ -15,7 +56,172 @@ body {
   background-color: var(--background-color);
   color: var(--text-color);
   margin: 0;
-  padding: 20px;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text-color);
+}
+
+h1 { font-size: var(--font-size-2xl); }
+h2 { font-size: var(--font-size-xl); }
+h3 { font-size: var(--font-size-lg); }
+h4 { font-size: var(--font-size-md); }
+h5 { font-size: var(--font-size-sm); }
+h6 { font-size: var(--font-size-xs); }
+
+p {
+  margin: 0 0 var(--spacing-md) 0;
+  line-height: 1.6;
+}
+
+/* Form elements */
+select, button, input, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  transition: all var(--transition-normal);
+}
+
+select:focus, button:focus, input:focus, textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+/* Utility classes */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Loading spinner */
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border-left-color: var(--primary-color);
+  animation: spin 1s ease infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive breakpoints */
+@media (max-width: 1200px) {
+  :root {
+    --spacing-lg: 18px;
+    --spacing-xl: 22px;
+  }
+}
+
+@media (max-width: 1024px) {
+  :root {
+    --spacing-md: 14px;
+    --spacing-lg: 16px;
+    --font-size-lg: 1.1rem;
+    --font-size-xl: 1.2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --spacing-sm: 10px;
+    --spacing-md: 12px;
+    --spacing-lg: 14px;
+    --font-size-md: 0.95rem;
+    --font-size-lg: 1.05rem;
+    --font-size-xl: 1.15rem;
+  }
+  
+  html {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --spacing-xs: 6px;
+    --spacing-sm: 8px;
+    --spacing-md: 10px;
+    --spacing-lg: 12px;
+    --font-size-sm: 0.85rem;
+    --font-size-md: 0.9rem;
+    --font-size-lg: 1rem;
+    --font-size-xl: 1.1rem;
+  }
+  
+  html {
+    font-size: 14px;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  :root {
+    --spacing-sm: 12px;
+    --spacing-md: 16px;
+  }
+  
+  select, button, input {
+    min-height: 44px;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --border-color: #000;
+    --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .spinner {
+    animation: none;
+  }
+}
+
+/* Print styles */
+@media print {
+  :root {
+    --background-color: #fff;
+    --panel-background: #fff;
+    --text-color: #000;
+    --border-color: #000;
+    --shadow: none;
+  }
+  
+  body {
+    background-color: #fff;
+    color: #000;
+  }
+  
+  .spinner {
+    display: none;
+  }
 }
 
 #app {
@@ -26,10 +232,10 @@ body {
 }
 
 .left-panel, .right-panel {
-  background-color: var(--card-background-color);
-  border-radius: 8px;
-  padding: 25px;
-  border: 1px solid #ddd;
+  background-color: var(--panel-background);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-lg);
+  border: 1px solid var(--border-color);
 }
 
 .left-panel {
@@ -38,7 +244,7 @@ body {
   max-width: 400px;
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: var(--spacing-xl);
 }
 
 .right-panel {
@@ -49,15 +255,9 @@ body {
 h2 {
   font-family: 'Inter', sans-serif;
   margin-top: 0;
-  margin-bottom: 15px;
   font-size: 1.1rem;
   font-weight: 500;
   color: #00203399;
-}
-
-select, button {
-  font-family: var(--font-family);
-  transition: all 0.2s ease-in-out;
 }
 
 .right-panel-loading-overlay {
@@ -73,20 +273,7 @@ select, button {
   align-items: center;
   z-index: 20; /* Выше, чем у оверлея в ImageViewer */
   backdrop-filter: blur(3px);
-  border-radius: 12px;
-}
-
-.spinner {
-  border: 4px solid rgba(0, 0, 0, 0.1);
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border-left-color: var(--primary-color);
-  animation: spin 1s ease infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
+  border-radius: var(--border-radius-lg);
 }
 
 @media (max-width: 900px) {
@@ -97,3 +284,4 @@ select, button {
     max-width: 100%;
   }
 }
+
