@@ -80,21 +80,128 @@ export default {
 <style scoped>
 .model-list-container {
   width: 100%;
+  background-color: var(--panel-background, #ffffff);
+
 }
+
+.model-list-container h2 {
+  margin-bottom: 15px;
+}
+
 .select-wrapper {
   position: relative;
+  margin-bottom: var(--spacing-sm, 12px);
 }
+
 select {
   width: 100%;
-  padding: 10px;
-  font-size: 1rem;
-  border-radius: 4px;
-  border: 1px solid #ccc;
+  padding: var(--spacing-md, 16px);
+  font-size: var(--font-size-md, 1rem);
+  border-radius: 5px;
+  border: 1.5px solid #b8cad5;
   background-color: white;
+  color: var(--text-color, #333);
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right var(--spacing-sm, 12px) center;
+  background-size: 16px;
+  padding-right: calc(var(--spacing-md, 16px) + 20px);
 }
+
+select:hover {
+  border-color: var(--primary-color, #007bff);
+}
+
+select:focus {
+  outline: none;
+  border-color: var(--primary-color, #007bff);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+select:disabled {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  cursor: not-allowed;
+}
+
 .forecast-count {
-  margin-top: 10px;
-  font-size: 0.85rem;
-  color: #78818b;
+  margin-top: var(--spacing-sm, 12px);
+  font-size: var(--font-size-sm, 0.875rem);
+  color: #6c757d;
+}
+
+/* Адаптивность для планшетов */
+@media (max-width: 1024px) {
+  .model-list-container {
+    padding: var(--spacing-md, 16px);
+  }
+  
+  .model-list-container h2 {
+    font-size: var(--font-size-lg, 1.125rem);
+  }
+  
+  select {
+    padding: var(--spacing-sm, 12px);
+    font-size: var(--font-size-sm, 0.875rem);
+  }
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+  .model-list-container {
+    padding: var(--spacing-sm, 12px);
+  }
+  
+  .model-list-container h2 {
+    font-size: var(--font-size-md, 1rem);
+    margin-bottom: var(--spacing-sm, 12px);
+  }
+  
+  select {
+    padding: var(--spacing-md, 16px);
+    font-size: var(--font-size-md, 1rem);
+    min-height: 48px; /* Увеличиваем высоту для touch */
+  }
+  
+  .forecast-count {
+    font-size: var(--font-size-xs, 0.75rem);
+    padding: var(--spacing-xs, 8px);
+  }
+}
+
+/* Адаптивность для очень маленьких экранов */
+@media (max-width: 480px) {
+  .model-list-container {
+    padding: var(--spacing-xs, 8px);
+  }
+  
+  .model-list-container h2 {
+    font-size: var(--font-size-sm, 0.875rem);
+  }
+  
+  select {
+    padding: var(--spacing-sm, 12px);
+    font-size: var(--font-size-sm, 0.875rem);
+    min-height: 44px;
+  }
+  
+  .forecast-count {
+    font-size: var(--font-size-xs, 0.75rem);
+    padding: var(--spacing-xs, 8px);
+  }
+}
+
+/* Улучшения для touch-устройств */
+@media (hover: none) and (pointer: coarse) {
+  select {
+    min-height: 48px;
+  }
+  
+  .model-list-container {
+    border-width: 2px;
+  }
 }
 </style>

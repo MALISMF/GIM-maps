@@ -80,27 +80,32 @@ export default {
 <style scoped>
 .image-viewer {
   width: 100%;
+  display: flex;
+  justify-content: center;
+  max-width: 100%;
 }
 
 .image-container {
-  position: relative; /* Важно для позиционирования оверлея */
-  width: 600px;  /* Фиксированная ширина */
-  height: 600px; /* Фиксированная высота */
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  aspect-ratio: 1;
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #f0f2f5;
-  border-radius: 8px;
+  background-color: var(--background-color, #f0f2f5);
   overflow: hidden;
-  border: 1px solid var(--border-color);
+  animation: fadeIn 0.3s ease-in-out;
 }
 
 .gim-image {
-  width: 100%;   /* Растягиваем на всю ширину контейнера */
-  height: 100%;  /* Растягиваем на всю высоту контейнера */
+  width: 100%;
+  height: 100%;
   object-fit: contain;
   display: block;
   transition: filter 0.2s ease-out;
+  background-color: white;
+  will-change: filter;
 }
 
 .gim-image.loading {
@@ -113,13 +118,15 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(255, 255, 255, 0.7);
+  background-color: rgba(255, 255, 255, 0.8);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   z-index: 10;
   backdrop-filter: blur(2px);
+  border-radius: var(--border-radius, 8px);
+  will-change: opacity;
 }
 
 .spinner {
@@ -127,8 +134,9 @@ export default {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  border-left-color: var(--primary-color);
+  border-left-color: var(--primary-color, #007bff);
   animation: spin 1s ease infinite;
+  margin-bottom: var(--spacing-sm, 12px);
 }
 
 @keyframes spin {
@@ -136,13 +144,114 @@ export default {
 }
 
 .loading-overlay p {
-  font-size: 16px;
+  font-size: var(--font-size-md, 1rem);
   font-weight: 500;
-  color: #333;
+  color: var(--text-color, #333);
+  margin: 0;
+  text-align: center;
 }
 
 .no-image {
   text-align: center;
   color: #777;
+  font-size: var(--font-size-md, 1rem);
+  padding: var(--spacing-lg, 20px);
+}
+
+/* Адаптивность для планшетов */
+@media (max-width: 1024px) {
+  .image-container {
+    max-width: 500px;
+  }
+  
+  .loading-overlay p {
+    font-size: var(--font-size-sm, 0.875rem);
+  }
+  
+  .no-image {
+    font-size: var(--font-size-sm, 0.875rem);
+    padding: var(--spacing-md, 16px);
+  }
+  
+  .spinner {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+  .image-container {
+    max-width: 100%;
+    aspect-ratio: 1;
+  }
+  
+  .loading-overlay p {
+    font-size: var(--font-size-sm, 0.875rem);
+  }
+  
+  .no-image {
+    font-size: var(--font-size-sm, 0.875rem);
+    padding: var(--spacing-sm, 12px);
+  }
+  
+  .spinner {
+    width: 28px;
+    height: 28px;
+    margin-bottom: var(--spacing-xs, 8px);
+  }
+}
+
+/* Адаптивность для очень маленьких экранов */
+@media (max-width: 480px) {
+  .image-container {
+    border-radius: var(--border-radius, 6px);
+  }
+  
+  .loading-overlay p {
+    font-size: var(--font-size-xs, 0.75rem);
+  }
+  
+  .no-image {
+    font-size: var(--font-size-xs, 0.75rem);
+    padding: var(--spacing-xs, 8px);
+  }
+  
+  .spinner {
+    width: 24px;
+    height: 24px;
+    margin-bottom: var(--spacing-xs, 8px);
+  }
+}
+
+/* Улучшения для touch-устройств */
+@media (hover: none) and (pointer: coarse) {
+  .image-container {
+    border-width: 2px;
+  }
+  
+  .gim-image {
+    cursor: pointer;
+  }
+}
+
+/* Улучшения для высокого DPI экранов */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .gim-image {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* Анимации для плавного появления */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>
