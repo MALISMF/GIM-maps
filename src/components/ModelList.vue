@@ -4,12 +4,12 @@
     <div v-if="loading">Загрузка...</div>
     <div v-else-if="error" style="color: red">Ошибка: {{ error }}</div>
     <div v-else>
-      <select v-model="selected" style="min-width: 250px;" >
+      <select v-model="selectedModel" style="min-width: 250px;" >
         <option value="" disabled>Выберите модель...</option>
         <option v-for="model in models" :key="model" :value="model">{{ model }}</option>
       </select>
-      <div v-if="selected" style="margin-top: 1rem;">
-        <strong>Выбрана модель:</strong> {{ selected }}
+      <div v-if="selectedModel" style="margin-top: 1rem;">
+        <strong>Выбрана модель:</strong> {{ selectedModel }}
       </div>
     </div>
   </div>
@@ -20,20 +20,24 @@ import axios from 'axios'
 
 export default {
   name: 'ModelList',
+  emits: ['selected-model', 'model-forecasts'],
+
   data() {
     return {
       models: [],
       loading: true,
       error: null,
-      selected: ''
+      selectedModel: '',
+      forecasts: []
     }
   },
   methods: {
+    // Загрузка списка моделей
   loadModels() {
     axios.get('https://services.simurg.space/gim-tec-forecast/models')
       .then(res => {
         this.models = Array.isArray(res.data) ? res.data : (res.data.models || [])
-        this.selected = this.models[0]
+        this.selectedModel = this.models[0]
       })
       .catch(err => {
         this.error = err.message
@@ -46,21 +50,23 @@ export default {
       // а) Загрузка прогнозов
         axios.get(`https://services.simurg.space/gim-tec-forecast/get_forecasts/${modelCode}`)
           .then(res => {
+            // Доступные прогнозы модели
             this.forecasts = res.data
-            console.log(modelCode,res.data)
           })
         
     }
   },
-
   mounted() {
     this.loadModels()
   },
 
   watch: {
-    selected(newModel) {
+    selectedModel(newModel) {
       if (newModel) {
         this.refresh_forecasts(newModel)
+        // Эмитим событие для родительского компонента
+        this.$emit('selected-model', newModel)
+        this.$emit('model-forecasts', this.forecasts)
       }
     }
   }

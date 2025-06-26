@@ -26,61 +26,79 @@
   </div>
 </template>
 
-<script setup>
-import { ref, computed } from 'vue';
+<script>
+export default {
+  props: {
+    forecast: {
+      type: Object,
+      default: null
+    }
+  },
+  data() {
+    const today = new Date();
+    return {
+      today,
+      selectedDate: new Date(),
+      currentMonth: today.getMonth(),
+      currentYear: today.getFullYear(),
+      weekdays: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
+    };
+  },
+  computed: {
+    daysInMonth() {
+      return new Date(this.currentYear, this.currentMonth + 1, 0).getDate();
+    },
+    firstDayOfMonth() {
+      let day = new Date(this.currentYear, this.currentMonth, 1).getDay();
+      return day === 0 ? 6 : day - 1;
+    },
+    blanks() {
+      return Array.from({ length: this.firstDayOfMonth }, (_, i) => i);
+    },
+    monthYear() {
+        const date = new Date(this.currentYear, this.currentMonth);
+        return `${date.toLocaleString('ru', { month: 'long' })} ${this.currentYear}`;
+    }
+  },
+  methods: {
+    prevMonth() {
+      if (this.currentMonth === 0) {
+        this.currentMonth = 11;
+        this.currentYear--;
+      } else {
+        this.currentMonth--;
+      }
+    },
+    nextMonth() {
+      if (this.currentMonth === 11) {
+        this.currentMonth = 0;
+        this.currentYear++;
+      } else {
+        this.currentMonth++;
+      }
+    },
+    selectDate(day) {
+      this.selectedDate = new Date(this.currentYear, this.currentMonth, day);
+    },
+    isSelected(day) {
+      return (
+        this.selectedDate.getDate() === day &&
+        this.selectedDate.getMonth() === this.currentMonth &&
+        this.selectedDate.getFullYear() === this.currentYear
+      );
+    }
+  },
 
-const today = new Date();
-const selectedDate = ref(new Date());
-const currentMonth = ref(today.getMonth());
-const currentYear = ref(today.getFullYear());
-
-const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
-
-const daysInMonth = computed(() => {
-  return new Date(currentYear.value, currentMonth.value + 1, 0).getDate();
-});
-
-const firstDayOfMonth = computed(() => {
-  // JS: 0 - Sunday, 1 - Monday ...
-  let day = new Date(currentYear.value, currentMonth.value, 1).getDay();
-  return day === 0 ? 6 : day - 1; // Make Monday first
-});
-
-const blanks = computed(() => Array.from({ length: firstDayOfMonth.value }, (_, i) => i));
-
-const monthYear = computed(() => {
-  return `${today.toLocaleString('ru', { month: 'long' })} ${currentYear.value}`;
-});
-
-function prevMonth() {
-  if (currentMonth.value === 0) {
-    currentMonth.value = 11;
-    currentYear.value--;
-  } else {
-    currentMonth.value--;
+  watch: {
+  forecast(forecasts){
+    if (forecasts) {
+      // Например, выделить дату
+      console.log('Выделяем дату:', forecasts);
+    }
   }
-}
+    }
 
-function nextMonth() {
-  if (currentMonth.value === 11) {
-    currentMonth.value = 0;
-    currentYear.value++;
-  } else {
-    currentMonth.value++;
-  }
-}
-
-function selectDate(day) {
-  selectedDate.value = new Date(currentYear.value, currentMonth.value, day);
-}
-
-function isSelected(day) {
-  return (
-    selectedDate.value.getDate() === day &&
-    selectedDate.value.getMonth() === currentMonth.value &&
-    selectedDate.value.getFullYear() === currentYear.value
-  );
-}
+};
 </script>
 
 <style scoped>
