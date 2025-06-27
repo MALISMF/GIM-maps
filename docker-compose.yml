@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  gim-maps-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gim-maps-frontend
+    ports:
+      - "3000:80"
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+    volumes:
+      # Для разработки можно подключить логи
+      - ./logs:/var/log/nginx
+    networks:
+      - gim-maps-network
+
+  # Если у вас есть бэкенд, добавьте его здесь
+  # gim-maps-backend:
+  #   image: your-backend-image
+  #   container_name: gim-maps-backend
+  #   ports:
+  #     - "8000:8000"
+  #   environment:
+  #     - DATABASE_URL=your-database-url
+  #   networks:
+  #     - gim-maps-network
+
+networks:
+  gim-maps-network:
+    driver: bridge 

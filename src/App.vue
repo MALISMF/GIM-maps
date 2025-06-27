@@ -189,7 +189,7 @@ export default {
 </script>
 
 <style>
-/* CSS переменные для адаптивности */
+
 :root {
   --primary-color: #007bff;
   --border-color: #ddd;
