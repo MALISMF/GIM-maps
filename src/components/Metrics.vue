@@ -11,7 +11,7 @@
   
       <div v-else-if="!isLoading && metricsData.length > 0" class="metrics-content">
         <!-- Графики метрик -->
-        <div class="charts-section">
+        <div v-if="filteredMetrics.length > 0" class="charts-section">
           <div class="chart-container">
             <h3>RMSE (Среднеквадратичная ошибка)</h3>
             <canvas ref="rmseChart" width="400" height="200"></canvas>
@@ -35,9 +35,8 @@
             <table class="metrics-table">
               <thead>
                 <tr>
-                  <th @click="sortBy('model_code')" class="sortable">
+                  <th>
                     Модель 
-                    <span v-if="sortField === 'model_code'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
                   </th>
                   <th>Версия</th>
                   <th @click="sortBy('forecast_start_date')" class="sortable">
@@ -81,6 +80,7 @@
   
   <script>
   import { Chart, registerables } from 'chart.js'
+  import 'chartjs-adapter-date-fns'
   
   Chart.register(...registerables)
   
@@ -141,12 +141,10 @@
     watch: {
       selectedModel() { this.fetchMetrics(); },
       selectedDate() { this.fetchMetrics(); },
-      filteredMetrics(newVal) {
-        if (newVal && newVal.length > 0) {
-          this.$nextTick(() => {
-            this.updateCharts();
-          });
-        }
+      filteredMetrics() {
+        this.$nextTick(() => {
+          this.updateCharts();
+        });
       }
     },
     
@@ -163,6 +161,8 @@
         if (!this.selectedModel || !this.startDate || !this.endDate) {
           this.error = 'Выберите модель и дату.';
           this.metricsData = [];
+          this.filteredMetrics = [];
+          this.destroyCharts();
           return;
         }
         const url = `${this.baseUrl}/get_metrics/${this.selectedModel}?date_from=${this.startDate}&date_to=${this.endDate}`;
@@ -173,44 +173,57 @@
           if (!response.ok) throw new Error(`Ошибка HTTP: ${response.status}`);
           this.metricsData = await response.json();
           this.filteredMetrics = this.metricsData;
+          
+          // Если нет данных, уничтожаем графики
+          if (this.metricsData.length === 0) {
+            this.destroyCharts();
+          }
         } catch (error) {
           this.error = 'Ошибка загрузки метрик: ' + error;
           this.metricsData = [];
+          this.filteredMetrics = [];
+          this.destroyCharts();
         } finally {
           this.isLoading = false;
         }
       },
       
-      
       updateCharts() {
-        // RMSE
-        const rmseData = this.filteredMetrics.map(m => m.rmse);
-        const labels = this.filteredMetrics.map(m => this.formatDate(m.forecast_start_date));
-        // MAE
-        const maeData = this.filteredMetrics.map(m => m.mae);
-        // MAPE
-        const mapeData = this.filteredMetrics.map(m => m.mape);
-        if (this.filteredMetrics.length === 0) return;
-        // Цвета
-        const rmseColor = 'rgba(102, 178, 255, 0.7)'; // светло-голубой
-        const maeColor = 'rgba(220, 53, 69, 0.7)';    // красный
-        const mapeColor = 'rgba(0, 32, 91, 0.7)';     // темно-синий
-        // Графики
-        this.createChart('rmse', 'rmseChart', labels, rmseData, rmseColor, 'RMSE');
-        this.createChart('mae', 'maeChart', labels, maeData, maeColor, 'MAE');
-        this.createChart('mape', 'mapeChart', labels, mapeData, mapeColor, 'MAPE (%)');
+        if (this.filteredMetrics.length === 0) {
+          this.destroyCharts();
+          return;
+        }
+
+        const formatDataForChart = (metricKey) => {
+          return this.filteredMetrics.map(m => ({
+            x: new Date(m.forecast_start_date),
+            y: m[metricKey]
+          })).sort((a, b) => a.x.getTime() - b.x.getTime());
+        };
+
+        const rmseData = formatDataForChart('rmse');
+        const maeData = formatDataForChart('mae');
+        const mapeData = formatDataForChart('mape');
+
+        const rmseColor = 'rgba(102, 178, 255, 0.7)';
+        const maeColor = 'rgba(220, 53, 69, 0.7)';
+        const mapeColor = 'rgba(0, 32, 91, 0.7)';
+
+        this.createChart('rmse', 'rmseChart', rmseData, rmseColor, 'RMSE');
+        this.createChart('mae', 'maeChart', maeData, maeColor, 'MAE');
+        this.createChart('mape', 'mapeChart', mapeData, mapeColor, 'MAPE (%)');
       },
       
-      createChart(chartKey, refName, labels, data, color, label) {
+      createChart(chartKey, refName, data, color, label) {
         if (this.charts[chartKey]) {
           this.charts[chartKey].destroy();
         }
         const ctx = this.$refs[refName];
         if (!ctx) return;
+        
         this.charts[chartKey] = new Chart(ctx, {
           type: 'line',
           data: {
-            labels,
             datasets: [{
               label,
               data,
@@ -227,11 +240,31 @@
               legend: { display: true }
             },
             scales: {
-              x: { display: true },
-              y: { display: true }
+              x: { 
+                type: 'time',
+                time: {
+                  unit: 'day',
+                  tooltipFormat: 'dd.MM.yyyy',
+                  displayFormats: {
+                    day: 'dd.MM'
+                  }
+                },
+                min: this.getLastMonthDate().getTime(),
+                max: new Date().getTime()
+              },
+              y: { 
+                beginAtZero: true
+              }
             }
           }
         });
+      },
+      
+      getLastMonthDate() {
+        const today = new Date();
+        const lastMonth = new Date(today);
+        lastMonth.setMonth(today.getMonth() - 1);
+        return lastMonth;
       },
       
       destroyCharts() {
@@ -305,7 +338,7 @@
   }
   </script>
   
-  <style scoped>
+<style scoped>
   .metrics-container {
     width: 100%;
     max-width: 100%;
@@ -663,4 +696,4 @@
       overflow-x: auto;
     }
   }
-  </style>
+</style>
