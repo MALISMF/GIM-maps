@@ -1,5 +1,116 @@
-# Vue 3 + Vite
+# GIM-maps: Веб-интерфейс для прогноза GIM-карт
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+## Описание
 
-Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
+GIM-maps — это одностраничное веб-приложение для визуализации и анализа прогнозов карт полного электронного содержания ионосферы (ПЭС). Система предназначена для исследователей и специалистов, работающих с ионосферными данными, и обеспечивает удобный доступ к прогнозам, метрикам качества моделей и скачиванию архивов данных.
+
+## Основные возможности
+
+- Выбор модели машинного обучения для прогноза ПЭС
+- Календарь с отображением доступных дат прогнозов
+- Просмотр GIM-карт с поддержкой временных сдвигов
+- Скачивание архивов прогнозов в формате .npz
+- Визуализация метрик качества моделей (RMSE, MAE, MAPE)
+- Адаптивный интерфейс для различных устройств
+- Контейнеризация с помощью Docker и раздача через Nginx
+
+## Структура проекта
+
+```
+GIM-maps-nogimcard/
+├── src/
+│   ├── components/
+│   │   ├── ModelList.vue          # Выбор моделей
+│   │   ├── ForecastCalendar.vue   # Календарь прогнозов
+│   │   ├── ImageViewer.vue        # Просмотр GIM-карт
+│   │   ├── DownloadNPZ.vue        # Скачивание архивов
+│   │   └── Metrics.vue            # Графики метрик
+│   ├── App.vue                    # Главный компонент
+│   ├── main.js                    # Точка входа
+│   └── style.css                  # Глобальные стили
+├── public/                        # Статические файлы
+├── Dockerfile                     # Docker-контейнер
+├── docker-compose.yml             # Docker Compose
+├── nginx.conf                     # Конфигурация Nginx
+├── package.json                   # Зависимости
+├── vite.config.js                 # Конфигурация Vite
+└── README.md                      # Документация
+```
+
+## Технологии
+
+- **Vue.js 3** — фреймворк для построения интерфейса
+- **Vite** — инструмент для сборки и разработки
+- **JavaScript (ES6+)** — язык программирования
+- **Chart.js** — визуализация метрик
+- **axios** — HTTP-запросы к API
+- **Docker** — контейнеризация приложения
+- **Nginx** — веб-сервер для раздачи статики
+- **HTML5, CSS3** — разметка и стилизация
+
+## Установка и запуск
+
+### 1. Клонирование репозитория
+
+```bash
+git clone https://github.com/MALISMF/GIM-maps.git
+cd GIM-maps-nogimcard
+```
+
+### 2. Установка зависимостей
+
+```bash
+npm install
+```
+
+### 3. Запуск в режиме разработки
+
+```bash
+npm run dev
+```
+
+Приложение будет доступно по адресу http://localhost:5173
+
+### 4. Сборка для продакшена
+
+```bash
+npm run build
+```
+
+### 5. Запуск с помощью Docker
+
+```bash
+docker build -t gim-maps-app .
+docker run -p 80:80 gim-maps-app
+```
+
+Или с помощью docker-compose:
+
+```bash
+docker-compose up --build
+```
+
+## Использование
+
+1. Выберите модель из выпадающего списка.
+2. В календаре выберите дату с доступным прогнозом.
+3. Просматривайте GIM-карты, переключая временные сдвиги.
+4. Скачивайте архивы прогнозов с помощью соответствующей кнопки.
+5. Анализируйте метрики качества моделей на графиках.
+
+## API эндпоинты
+
+- `/models` — список моделей
+- `/get_forecasts/{model_code}` — прогнозы по модели
+- `/get_forecast_size/{forecast_id}` — размер пачки прогнозов
+- `/get_forecast_image/{forecast_id}?shift={shift}` — изображение прогноза
+- `/get_forecast_object/{forecast_id}` — скачивание архива
+- `/get_metrics/{model_code}` — метрики качества
+
+## Ссылка на репозиторий
+
+[https://github.com/MALISMF/GIM-maps](https://github.com/MALISMF/GIM-maps)
+
+## Лицензия
+
+Проект распространяется под лицензией MIT.
