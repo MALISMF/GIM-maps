@@ -111,6 +111,3 @@ docker-compose up --build
 
 [https://github.com/MALISMF/GIM-maps](https://github.com/MALISMF/GIM-maps)
 
-## Лицензия
-
-Проект распространяется под лицензией MIT.
