@@ -103,7 +103,7 @@ export default {
       isPanelLoading: false,
       error: null,
       currentShiftInfo: null,
-      baseUrl: 'https://services.simurg.space/gim-tec-forecast',
+      baseUrl: '/gim-tec-forecast',
       forecastSize: 24,
       selectedShift: 0
     }

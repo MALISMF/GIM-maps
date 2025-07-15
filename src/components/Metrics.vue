@@ -96,7 +96,7 @@
         filteredMetrics: [],
         isLoading: false,
         error: null,
-        baseUrl: 'https://services.simurg.space/gim-tec-forecast',
+        baseUrl: '/gim-tec-forecast',
         charts: {
           rmse: null,
           mape: null,

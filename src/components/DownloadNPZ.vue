@@ -35,7 +35,7 @@ export default {
       error: null,
       success: false,
       isLoading: false,
-      baseUrl: 'https://services.simurg.space/gim-tec-forecast'
+      baseUrl: '/gim-tec-forecast'
     }
   },
   methods: {

@@ -4,4 +4,13 @@ import vue from '@vitejs/plugin-vue'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [vue()],
+  server: {
+    proxy: {
+      '/gim-tec-forecast': {
+        target: 'https://services.simurg.space',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
 })

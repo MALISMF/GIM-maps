@@ -30,7 +30,7 @@ export default {
   
   methods: {
     async loadModels() {
-      const res = await axios.get('https://services.simurg.space/gim-tec-forecast/models');
+      const res = await axios.get('/gim-tec-forecast/models');
       this.models = Array.isArray(res.data) ? res.data : (res.data.models || []);
       if (this.models.length > 0) {
         this.selectedModel = this.models[0];
@@ -40,7 +40,7 @@ export default {
       if (!modelCode) return;
       this.forecasts = [];
       try {
-        const res = await axios.get(`https://services.simurg.space/gim-tec-forecast/get_forecasts/${modelCode}`);
+        const res = await axios.get(`/gim-tec-forecast/get_forecasts/${modelCode}`);
         this.forecasts = Array.isArray(res.data) ? res.data : [];
         this.$emit('selected-model', modelCode);
         this.$emit('model-forecasts', this.forecasts);

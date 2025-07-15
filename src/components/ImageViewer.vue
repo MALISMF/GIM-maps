@@ -37,7 +37,7 @@ export default {
       currentImage: null,
       isImageLoading: false,
       imageError: null,
-      baseUrl: 'https://services.simurg.space/gim-tec-forecast'
+      baseUrl: '/gim-tec-forecast'
     };
   },
   watch: {
