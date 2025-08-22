@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     container_name: gim-maps-frontend
     ports:
-      - "3000:80"
+      - "8085:80"
     restart: unless-stopped
     environment:
       - NODE_ENV=production
