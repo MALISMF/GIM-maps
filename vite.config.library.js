@@ -15,23 +15,23 @@ export default defineConfig({
       name: 'copy-style-css',
       closeBundle() {
         const src = path.resolve(__dirname, 'src/style.css')
-        const dest = path.resolve(__dirname, 'dist-library/style.css')
+        const dest = path.resolve(__dirname, 'gim-tec-library/style.css')
         
-        // Создаём папку dist-library, если её нет
+        // Создаём папку gim-tec-library, если её нет
         fs.mkdirSync(path.dirname(dest), { recursive: true })
         
         fs.copyFileSync(src, dest)
         
-        console.log('✓ style.css copied to dist-library/')
+        console.log('✓ style.css copied to gim-tec-library/')
       }
     }
   ],
   build: {
     lib: {
       entry: path.resolve(__dirname, 'src/App.vue'),
-      name: 'MyAppLibrary',
+      name: 'GimTecLibrary',
       formats: ['es', 'umd'],
-      fileName: (format) => `app-library.${format}.js`
+      fileName: (format) => `gim-tec.${format}.js`
     },
     rollupOptions: {
       external: ['vue'],
@@ -41,7 +41,7 @@ export default defineConfig({
         }
       }
     },
-    outDir: 'dist-library',
+    outDir: 'gim-tec-library',
     cssCodeSplit: true
   }
 })
