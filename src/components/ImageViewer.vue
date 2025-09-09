@@ -6,7 +6,7 @@
         <div class="spinner"></div>
         <p>Загрузка GIM-карты...</p>
       </div>
-      
+
       <!-- Изображение и альтернативные состояния -->
       <img
         v-if="currentImage"
@@ -37,7 +37,7 @@ export default {
       currentImage: null,
       isImageLoading: false,
       imageError: null,
-      baseUrl: '/gim-tec-forecast'
+      baseUrl: 'https://services.simurg.space/gim-tec-forecast'
     };
   },
   watch: {
@@ -163,16 +163,16 @@ export default {
   .image-container {
     max-width: 500px;
   }
-  
+
   .loading-overlay p {
     font-size: var(--font-size-sm, 0.875rem);
   }
-  
+
   .no-image {
     font-size: var(--font-size-sm, 0.875rem);
     padding: var(--spacing-md, 16px);
   }
-  
+
   .spinner {
     width: 32px;
     height: 32px;
@@ -185,16 +185,16 @@ export default {
     max-width: 100%;
     aspect-ratio: 1;
   }
-  
+
   .loading-overlay p {
     font-size: var(--font-size-sm, 0.875rem);
   }
-  
+
   .no-image {
     font-size: var(--font-size-sm, 0.875rem);
     padding: var(--spacing-sm, 12px);
   }
-  
+
   .spinner {
     width: 28px;
     height: 28px;
@@ -207,16 +207,16 @@ export default {
   .image-container {
     border-radius: var(--border-radius, 6px);
   }
-  
+
   .loading-overlay p {
     font-size: var(--font-size-xs, 0.75rem);
   }
-  
+
   .no-image {
     font-size: var(--font-size-xs, 0.75rem);
     padding: var(--spacing-xs, 8px);
   }
-  
+
   .spinner {
     width: 24px;
     height: 24px;
@@ -229,7 +229,7 @@ export default {
   .image-container {
     border-width: 2px;
   }
-  
+
   .gim-image {
     cursor: pointer;
   }

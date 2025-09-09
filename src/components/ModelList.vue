@@ -27,10 +27,10 @@ export default {
       forecasts: []
     }
   },
-  
+
   methods: {
     async loadModels() {
-      const res = await axios.get('/gim-tec-forecast/models');
+      const res = await axios.get('https://services.simurg.space/gim-tec-forecast/models');
       this.models = Array.isArray(res.data) ? res.data : (res.data.models || []);
       if (this.models.length > 0) {
         this.selectedModel = this.models[0];
@@ -40,7 +40,7 @@ export default {
       if (!modelCode) return;
       this.forecasts = [];
       try {
-        const res = await axios.get(`/gim-tec-forecast/get_forecasts/${modelCode}`);
+        const res = await axios.get(`https://services.simurg.space/gim-tec-forecast/get_forecasts/${modelCode}`);
         this.forecasts = Array.isArray(res.data) ? res.data : [];
         this.$emit('selected-model', modelCode);
         this.$emit('model-forecasts', this.forecasts);
@@ -50,7 +50,7 @@ export default {
       }
     }
   },
-  
+
   async mounted() {
     await this.loadModels();
   },
@@ -138,11 +138,11 @@ select:disabled {
   .model-list-container {
     padding: var(--spacing-md, 16px);
   }
-  
+
   .model-list-container h2 {
     font-size: var(--font-size-lg, 1.125rem);
   }
-  
+
   select {
     padding: var(--spacing-sm, 12px);
     font-size: var(--font-size-sm, 0.875rem);
@@ -154,18 +154,18 @@ select:disabled {
   .model-list-container {
     padding: var(--spacing-sm, 12px);
   }
-  
+
   .model-list-container h2 {
     font-size: var(--font-size-md, 1rem);
     margin-bottom: var(--spacing-sm, 12px);
   }
-  
+
   select {
     padding: var(--spacing-md, 16px);
     font-size: var(--font-size-md, 1rem);
     min-height: 48px; /* Увеличиваем высоту для touch */
   }
-  
+
   .forecast-count {
     font-size: var(--font-size-xs, 0.75rem);
     padding: var(--spacing-xs, 8px);
@@ -177,17 +177,17 @@ select:disabled {
   .model-list-container {
     padding: var(--spacing-xs, 8px);
   }
-  
+
   .model-list-container h2 {
     font-size: var(--font-size-sm, 0.875rem);
   }
-  
+
   select {
     padding: var(--spacing-sm, 12px);
     font-size: var(--font-size-sm, 0.875rem);
     min-height: 44px;
   }
-  
+
   .forecast-count {
     font-size: var(--font-size-xs, 0.75rem);
     padding: var(--spacing-xs, 8px);
@@ -199,7 +199,7 @@ select:disabled {
   select {
     min-height: 48px;
   }
-  
+
   .model-list-container {
     border-width: 2px;
   }

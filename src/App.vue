@@ -1,13 +1,13 @@
 <template>
   <div id="app">
     <div class="left-panel">
-      <ModelList 
-        @selected-model="onModelSelected" 
+      <ModelList
+        @selected-model="onModelSelected"
         @model-forecasts="onModelForecasts"
       />
-      <ForecastCalendar 
-        :forecasts="forecasts" 
-        @forecast-selected="onForecastSelected" 
+      <ForecastCalendar
+        :forecasts="forecasts"
+        @forecast-selected="onForecastSelected"
       />
     </div>
 
@@ -16,43 +16,43 @@
         <div class="spinner"></div>
         <p>Загрузка данных прогноза...</p>
       </div>
-      
+
       <div v-if="error" class="error-display">
         <p><strong>Ошибка:</strong> {{ error }}</p>
       </div>
-      
+
       <template v-if="selectedForecast">
         <div class="forecast-header">
           <h2>Просмотр прогноза</h2>
           <div class="forecast-info">
             <p><strong>Дата:</strong> {{ formatDate(selectedForecast.forecast_start_date) }}</p>
             <p><strong>ID:</strong> {{ selectedForecast.id }}</p>
-            
+
             <div v-if="forecastSize > 0" class="image-controls">
               <label for="shift-select"><strong>Карта:</strong></label>
-              <select 
-                id="shift-select" 
+              <select
+                id="shift-select"
                 v-model.number="selectedShift"
                 :disabled="isPanelLoading"
               >
-                <option 
-                  v-for="n in forecastSize" 
-                  :key="n - 1" 
+                <option
+                  v-for="n in forecastSize"
+                  :key="n - 1"
                   :value="n - 1"
                 >
                   {{ n - 1 }} ({{ getShiftTime(n - 1) }})
                 </option>
               </select>
             </div>
-            
+
             <p v-if="forecastSize > 0" class="total-maps-info">
               <strong>Всего:</strong> {{ forecastSize }}
             </p>
           </div>
         </div>
-        
+
         <div class="viewer-area">
-          <ImageViewer 
+          <ImageViewer
             :key="selectedForecast?.id"
             :forecast-id="selectedForecast?.id"
             :is-panel-loading="isPanelLoading"
@@ -61,14 +61,14 @@
             @image-error="onImageError"
           />
           <DownloadNPZ :forecast-id="selectedForecast?.id"/>
-          <Metrics 
-            v-if="selectedModel && selectedDate" 
+          <Metrics
+            v-if="selectedModel && selectedDate"
             :selectedModel="selectedModel"
             :selectedDate="selectedDate"
           />
         </div>
       </template>
-      
+
       <div v-else-if="!isPanelLoading && !error" class="viewer-area no-forecast-selected">
         <p>Выберите модель и дату для просмотра GIM-карт.</p>
       </div>
@@ -91,7 +91,7 @@ export default {
     ImageViewer,
     DownloadNPZ,
     Metrics
-  }, 
+  },
 
   data() {
     return {
@@ -103,7 +103,7 @@ export default {
       isPanelLoading: false,
       error: null,
       currentShiftInfo: null,
-      baseUrl: '/gim-tec-forecast',
+      baseUrl: 'https://services.simurg.space/gim-tec-forecast',
       forecastSize: 24,
       selectedShift: 0
     }
@@ -114,7 +114,7 @@ export default {
       return this.selectedForecast?.id || this.selectedForecast?.forecast_id || null;
     }
   },
-  
+
   watch: {
     selectedForecast: {
       handler(newForecast) {
@@ -138,7 +138,7 @@ export default {
       this.selectedForecast = null;
       this.selectedDate = '';
     },
-    
+
     onForecastSelected(forecast) {
       this.selectedForecast = forecast;
       this.selectedDate = forecast.forecast_start_date;
@@ -152,7 +152,7 @@ export default {
       this.error = error;
       this.isPanelLoading = false;
     },
-    
+
     onShiftChanged(shiftInfo) {
       this.currentShiftInfo = shiftInfo;
     },
@@ -166,7 +166,7 @@ export default {
         day: 'numeric'
       });
     },
-    
+
     async fetchForecastSize(forecastId) {
       try {
         const response = await fetch(`${this.baseUrl}/get_forecast_size/${forecastId}`);
@@ -178,7 +178,7 @@ export default {
         this.forecastSize = 24;
       }
     },
-    
+
     getShiftTime(shift) {
       const hours = shift;
       const minutes = 0;
@@ -478,7 +478,7 @@ body {
   .image-controls select {
     min-height: 44px; /* Минимальная высота для touch */
   }
-  
+
   .forecast-info {
     gap: var(--spacing-md);
   }
