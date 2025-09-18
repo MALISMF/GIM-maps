@@ -1,7 +1,7 @@
 <template>
   <div class="download-npz">
-    <button 
-      @click="downloadNPZ" 
+    <button
+      @click="downloadNPZ"
       :disabled="!forecastId || isLoading"
       class="download-btn"
     >
@@ -35,7 +35,7 @@ export default {
       error: null,
       success: false,
       isLoading: false,
-      baseUrl: '/gim-tec-forecast'
+      baseUrl: 'https://services.simurg.space/gim-tec-forecast'
     }
   },
   methods: {
@@ -67,11 +67,11 @@ export default {
       const link = document.createElement('a');
       link.href = url;
       link.download = filename;
-      
+
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       window.URL.revokeObjectURL(url);
     }
   }
@@ -144,8 +144,8 @@ export default {
   will-change: transform;
 }
 
-@keyframes spin { 
-  to { transform: rotate(360deg); } 
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 /* Адаптивность для планшетов */
@@ -154,17 +154,17 @@ export default {
     margin-top: var(--spacing-md, 16px);
     padding: 0 var(--spacing-xs, 8px);
   }
-  
+
   .download-btn {
     padding: var(--spacing-sm, 12px) var(--spacing-md, 16px);
     font-size: var(--font-size-sm, 0.875rem);
     min-height: 44px;
   }
-  
+
   .btn-content {
     gap: var(--spacing-xs, 8px);
   }
-  
+
   .btn-spinner {
     width: 18px;
     height: 18px;
@@ -185,11 +185,11 @@ export default {
     padding: var(--spacing-md, 16px) var(--spacing-sm, 12px);
     min-height: 48px;
   }
-  
+
   .btn-content {
     gap: var(--spacing-xs, 8px);
   }
-  
+
   .btn-spinner {
     width: 18px;
     height: 18px;
@@ -202,17 +202,17 @@ export default {
     margin-top: var(--spacing-xs, 8px);
     padding: 0 var(--spacing-xs, 8px);
   }
-  
+
   .download-btn {
     font-size: var(--font-size-xs, 0.75rem);
     padding: var(--spacing-sm, 12px) var(--spacing-xs, 8px);
     min-height: 44px;
   }
-  
+
   .btn-content {
     gap: var(--spacing-xs, 8px);
   }
-  
+
   .btn-spinner {
     width: 16px;
     height: 16px;
@@ -225,11 +225,11 @@ export default {
     min-height: 48px;
     border-width: 2px;
   }
-  
+
   .download-btn:hover:not(:disabled) {
     transform: none;
   }
-  
+
   .download-btn:active:not(:disabled) {
     background-color: var(--primary-color, #007bff);
     color: white;
