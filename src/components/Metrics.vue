@@ -1,82 +1,82 @@
 <template>
-    <div class="metrics-container">
+  <div class="metrics-container">
 
-      <div v-if="error" class="error-message">
-        {{ error }}
-      </div>
+    <div v-if="error" class="error-message">
+      {{ error }}
+    </div>
 
-      <div v-if="isLoading" class="loading">
-        Загрузка метрик...
-      </div>
+    <div v-if="isLoading" class="loading">
+      Loading metrics...
+    </div>
 
-      <div v-else-if="!isLoading && metricsData.length > 0" class="metrics-content">
-        <!-- Графики метрик -->
-        <div v-if="filteredMetrics.length > 0" class="charts-section">
-          <div class="chart-container">
-            <h3>RMSE (Среднеквадратичная ошибка)</h3>
-            <canvas ref="rmseChart" width="400" height="200"></canvas>
-          </div>
-
-          <div class="chart-container">
-            <h3>MAE (Средняя абсолютная ошибка)</h3>
-            <canvas ref="maeChart" width="400" height="200"></canvas>
-          </div>
-
-          <div class="chart-container">
-            <h3>MAPE (Средняя абсолютная процентная ошибка), %</h3>
-            <canvas ref="mapeChart" width="400" height="200"></canvas>
-          </div>
+    <div v-else-if="!isLoading && metricsData.length > 0" class="metrics-content">
+      <!-- Metrics charts -->
+      <div v-if="filteredMetrics.length > 0" class="charts-section">
+        <div class="chart-container">
+          <h3>RMSE (Root Mean Square Error)</h3>
+          <canvas ref="rmseChart" width="400" height="200"></canvas>
         </div>
 
-        <!-- Таблица с данными -->
-        <div class="table-section">
-          <h3>Детальные данные метрик</h3>
-          <div class="table-container">
-            <table class="metrics-table">
-              <thead>
-                <tr>
-                  <th>
-                    Модель
-                  </th>
-                  <th>Версия</th>
-                  <th @click="sortBy('forecast_start_date')" class="sortable">
-                    Дата прогноза
-                    <span v-if="sortField === 'forecast_start_date'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
-                  </th>
-                  <th @click="sortBy('rmse')" class="sortable">
-                    RMSE
-                    <span v-if="sortField === 'rmse'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
-                  </th>
-                  <th @click="sortBy('mape')" class="sortable">
-                    MAPE (%)
-                    <span v-if="sortField === 'mape'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
-                  </th>
-                  <th @click="sortBy('mae')" class="sortable">
-                    MAE
-                    <span v-if="sortField === 'mae'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="metric in sortedMetrics" :key="`${metric.model_code}-${metric.forecast_start_date}`">
-                  <td>{{ metric.model_code }}</td>
-                  <td>{{ metric.model_version }}</td>
-                  <td>{{ formatDate(metric.forecast_start_date) }}</td>
-                  <td :class="getScoreClass('rmse', metric.rmse)">{{ metric.rmse !== null ? metric.rmse.toFixed(3) : '-' }}</td>
-                  <td :class="getScoreClass('mape', metric.mape)">{{ metric.mape !== null ? metric.mape.toFixed(2) : '-' }}</td>
-                  <td :class="getScoreClass('mae', metric.mae)">{{ metric.mae !== null ? metric.mae.toFixed(3) : '-' }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+        <div class="chart-container">
+          <h3>MAE (Mean Absolute Error)</h3>
+          <canvas ref="maeChart" width="400" height="200"></canvas>
+        </div>
+
+        <div class="chart-container">
+          <h3>MAPE (Mean Absolute Percentage Error), %</h3>
+          <canvas ref="mapeChart" width="400" height="200"></canvas>
         </div>
       </div>
 
-      <div v-else-if="!isLoading" class="no-data">
-        Нет метрик за последний месяц
+      <!-- Data table -->
+      <div class="table-section">
+        <h3>Detailed Metrics Data</h3>
+        <div class="table-container">
+          <table class="metrics-table">
+            <thead>
+              <tr>
+                <th>
+                  Model
+                </th>
+                <th>Version</th>
+                <th @click="sortBy('forecast_start_date')" class="sortable">
+                  Forecast Date
+                  <span v-if="sortField === 'forecast_start_date'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
+                </th>
+                <th @click="sortBy('rmse')" class="sortable">
+                  RMSE
+                  <span v-if="sortField === 'rmse'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
+                </th>
+                <th @click="sortBy('mape')" class="sortable">
+                  MAPE (%)
+                  <span v-if="sortField === 'mape'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
+                </th>
+                <th @click="sortBy('mae')" class="sortable">
+                  MAE
+                  <span v-if="sortField === 'mae'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="metric in sortedMetrics" :key="`${metric.model_code}-${metric.forecast_start_date}`">
+                <td>{{ metric.model_code }}</td>
+                <td>{{ metric.model_version }}</td>
+                <td>{{ formatDate(metric.forecast_start_date) }}</td>
+                <td :class="getScoreClass('rmse', metric.rmse)">{{ metric.rmse !== null ? metric.rmse.toFixed(3) : '-' }}</td>
+                <td :class="getScoreClass('mape', metric.mape)">{{ metric.mape !== null ? metric.mape.toFixed(2) : '-' }}</td>
+                <td :class="getScoreClass('mae', metric.mae)">{{ metric.mae !== null ? metric.mae.toFixed(3) : '-' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
-  </template>
+
+    <div v-else-if="!isLoading" class="no-data">
+      No metrics available for the last month
+    </div>
+  </div>
+</template>
 
   <script>
   import { Chart, registerables } from 'chart.js'

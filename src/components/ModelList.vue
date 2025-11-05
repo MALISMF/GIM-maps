@@ -1,9 +1,9 @@
 <template>
   <div class="model-list-container">
-    <h2>Доступные модели</h2>
+    <h2>Available models</h2>
     <div class="select-wrapper">
       <select v-model="selectedModel">
-        <option value="" disabled>Выберите модель</option>
+        <option value="" disabled>Select a model</option>
         <option v-for="model in models" :key="model" :value="model">{{ model }}</option>
       </select>
     </div>
@@ -69,9 +69,9 @@ export default {
   computed: {
     forecastCountText() {
       if (this.forecasts.length > 0) {
-        return `Найдено прогнозов: ${this.forecasts.length}`;
+        return `Forecasts found: ${this.forecasts.length}`;
       }
-      return 'Прогнозы для модели не найдены.';
+      return 'No predictions found for the model.';
     }
   }
 }
