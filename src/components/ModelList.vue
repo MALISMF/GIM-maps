@@ -30,10 +30,23 @@ export default {
 
   methods: {
     async loadModels() {
-      const res = await axios.get('https://services.simurg.space/gim-tec-forecast/models');
-      this.models = Array.isArray(res.data) ? res.data : (res.data.models || []);
-      if (this.models.length > 0) {
-        this.selectedModel = this.models[0];
+      try {
+        const res = await axios.get('https://services.simurg.space/gim-tec-forecast/models');
+        this.models = Array.isArray(res.data) ? res.data : (res.data.models || []);
+
+        // Set default model to "GIMini-LSTM-F10.7-7" if available, otherwise fallback to first model
+        const defaultModel = "GIMini-LSTM-F10.7-7";
+        if (this.models.includes(defaultModel)) {
+          this.selectedModel = defaultModel;
+        } else if (this.models.length > 0) {
+          this.selectedModel = this.models[0];
+        } else {
+          this.selectedModel = ''; // no models available
+        }
+      } catch (error) {
+        console.error('Failed to load models:', error);
+        this.models = [];
+        this.selectedModel = '';
       }
     },
     async refresh_forecasts(modelCode) {
@@ -56,13 +69,10 @@ export default {
   },
 
   watch: {
-    selectedModel: {
-      handler(newModel) {
-        if (newModel) {
-          this.refresh_forecasts(newModel);
-        }
-      },
-      immediate: true
+    selectedModel(newModel) {
+      if (newModel) {
+        this.refresh_forecasts(newModel);
+      }
     }
   },
 
