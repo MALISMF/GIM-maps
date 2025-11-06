@@ -4,7 +4,7 @@
       <!-- Оверлей загрузки, который накладывается поверх контента -->
       <div v-if="isImageLoading && !isPanelLoading" class="loading-overlay">
         <div class="spinner"></div>
-        <p>Загрузка GIM-карты...</p>
+        <p>Loading GIM map...</p>
       </div>
 
       <!-- Изображение и альтернативные состояния -->
@@ -17,7 +17,7 @@
       />
 
       <div v-else-if="!currentImage" class="no-image">
-        <p>Изображение не загружено</p>
+        <p>Image not loaded</p>
       </div>
     </div>
   </div>

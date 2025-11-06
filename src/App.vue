@@ -14,22 +14,22 @@
     <div class="right-panel">
       <div v-if="isPanelLoading" class="right-panel-loading-overlay">
         <div class="spinner"></div>
-        <p>Загрузка данных прогноза...</p>
+        <p>Loading forecast data...</p>
       </div>
 
       <div v-if="error" class="error-display">
-        <p><strong>Ошибка:</strong> {{ error }}</p>
+        <p><strong>Error:</strong> {{ error }}</p>
       </div>
 
       <template v-if="selectedForecast">
         <div class="forecast-header">
-          <h2>Просмотр прогноза</h2>
+          <h2>Forecast View</h2>
           <div class="forecast-info">
-            <p><strong>Дата:</strong> {{ formatDate(selectedForecast.forecast_start_date) }}</p>
+            <p><strong>Date:</strong> {{ formatDate(selectedForecast.forecast_start_date) }}</p>
             <p><strong>ID:</strong> {{ selectedForecast.id }}</p>
 
             <div v-if="forecastSize > 0" class="image-controls">
-              <label for="shift-select"><strong>Карта:</strong></label>
+              <label for="shift-select"><strong>Map:</strong></label>
               <select
                 id="shift-select"
                 v-model.number="selectedShift"
@@ -46,7 +46,7 @@
             </div>
 
             <p v-if="forecastSize > 0" class="total-maps-info">
-              <strong>Всего:</strong> {{ forecastSize }}
+              <strong>Total:</strong> {{ forecastSize }}
             </p>
           </div>
         </div>
@@ -70,7 +70,7 @@
       </template>
 
       <div v-else-if="!isPanelLoading && !error" class="viewer-area no-forecast-selected">
-        <p>Выберите модель и дату для просмотра GIM-карт.</p>
+        <p>Select a model and date to view GIM maps.</p>
       </div>
     </div>
   </div>
@@ -103,7 +103,7 @@ export default {
       isPanelLoading: false,
       error: null,
       currentShiftInfo: null,
-      baseUrl: 'https://services.simurg.space/gim-tec-forecast',
+      baseUrl: 'https://services.simurg.space/gim-tec-forecast  ',
       forecastSize: 24,
       selectedShift: 0
     }
@@ -160,7 +160,7 @@ export default {
     formatDate(dateString) {
       if (!dateString) return 'N/A';
       const date = new Date(dateString);
-      return date.toLocaleDateString('ru-RU', {
+      return date.toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
@@ -170,7 +170,7 @@ export default {
     async fetchForecastSize(forecastId) {
       try {
         const response = await fetch(`${this.baseUrl}/get_forecast_size/${forecastId}`);
-        if (!response.ok) throw new Error('Сетевой ответ не был успешным');
+        if (!response.ok) throw new Error('Network response was not ok');
         const textResponse = await response.text();
         const data = JSON.parse(textResponse);
         this.forecastSize = data.size || data.forecast_size || data.total_shifts || 24;
@@ -454,7 +454,7 @@ body {
   text-align: left;
 }
 
-/* Стили для компонентов */
+/* Styles for components */
 :deep(.download-npz),
 :deep(.download-npz *) {
   max-width: 600px !important;
@@ -473,10 +473,10 @@ body {
   box-sizing: border-box;
 }
 
-/* Улучшения для touch-устройств */
+/* Improvements for touch devices */
 @media (hover: none) and (pointer: coarse) {
   .image-controls select {
-    min-height: 44px; /* Минимальная высота для touch */
+    min-height: 44px; /* Minimum height for touch */
   }
 
   .forecast-info {
