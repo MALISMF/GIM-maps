@@ -2,8 +2,43 @@
   <h2>Available forecast dates</h2>
   <div class="calendar-container">
     <div class="calendar-header">
-      <button @click="prevMonth" class="nav-btn" :disabled="!canGoPrev"><img src = "../assets/icons/Vector.svg"</button>
-      <span class="month-year">{{ monthYear }}</span>
+      <button @click="prevMonth" class="nav-btn" :disabled="!canGoPrev"><img src = "../assets/icons/Vector.svg"></button>
+
+      <div class="month-year-wrapper" ref="monthYearWrapper">
+        <div class="month-year-trigger" :class="{ 'dropdown-open': dropdownOpen }" @click="toggleMonthYearDropdown">
+          <span class="month-year-text">
+            {{ getMonthName(currentMonth) }} {{ currentYear }}
+          </span>
+          <span class="month-year-arrow">▼</span>
+        </div>
+
+        <div v-if="dropdownOpen" class="month-year-dropdown">
+          <div class="month-column">
+            <span class="month-column-title">Month</span>
+            <div
+              v-for="m in visibleMonths"
+              :key="m"
+              :class="['month-item', { active: m === currentMonth && hoveredOrCurrentYear === currentYear }]"
+              @click="selectMonthFromDropdown(m)"
+            >
+              {{ getMonthName(m) }}
+            </div>
+          </div>
+          <div class="year-column">
+            <span class="year-column-title">Year</span>
+            <div
+              v-for="y in availableYears"
+              :key="y"
+              :class="['year-item', { active: y === hoveredOrCurrentYear }]"
+              @mouseenter="hoverYear = y"
+              @click="selectYearFromDropdown(y)"
+            >
+              {{ y }}
+            </div>
+          </div>
+        </div>
+      </div>
+
       <button @click="nextMonth" class="nav-btn" :disabled="!canGoNext"><img src = "../assets/icons/IconForward.svg"></button>
     </div>
     <div class="calendar-grid">
@@ -38,10 +73,23 @@ export default {
       selectedDate: null,
       currentMonth: today.getMonth(),
       currentYear: today.getFullYear(),
-      // weekdays: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
+      weekdays:['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
       minForecastDate: null,
       maxForecastDate: null,
+
+      // кастомный дропдаун для месяца/года
+      dropdownOpen: false,
+      hoverYear: null,
     };
+  },
+
+  mounted() {
+    // Закрываем дропдаун при клике вне него
+    document.addEventListener('click', this.handleClickOutside);
+  },
+
+  beforeUnmount() {
+    document.removeEventListener('click', this.handleClickOutside);
   },
 
   computed: {
@@ -98,7 +146,49 @@ export default {
       if (!this.maxForecastDate) return false;
       const lastDayOfCurrentMonth = new Date(this.currentYear, this.currentMonth + 1, 0);
       return lastDayOfCurrentMonth < this.maxForecastDate;
-    }
+    },
+
+    // Словарь: год -> массив доступных месяцев (индексы 0-11)
+    availableMonthsByYear() {
+      const monthsByYear = {};
+      this.availableDates.forEach(dateStr => {
+        const [year, month, day] = dateStr.split('-').map(Number);
+        const yearKey = year;
+        const monthIndex = month - 1; // Преобразуем в индекс месяца (0-11)
+        
+        if (!monthsByYear[yearKey]) {
+          monthsByYear[yearKey] = new Set();
+        }
+        monthsByYear[yearKey].add(monthIndex);
+      });
+      
+      // Преобразуем Set в отсортированные массивы
+      const result = {};
+      Object.keys(monthsByYear).forEach(year => {
+        result[year] = Array.from(monthsByYear[year]).sort((a, b) => a - b);
+      });
+      return result;
+    },
+
+    // Массив доступных годов (отсортированный)
+    availableYears() {
+      return Object.keys(this.availableMonthsByYear)
+        .map(Number)
+        .sort((a, b) => a - b);
+    },
+
+    // Год на основе hover или текущего выбора
+    hoveredOrCurrentYear() {
+      return this.hoverYear || this.currentYear;
+    },
+
+    // массив доступных месяцев для года
+    visibleMonths() {
+      if (!this.hoveredOrCurrentYear || !this.availableMonthsByYear[this.hoveredOrCurrentYear]) {
+        return [];
+      }
+      return this.availableMonthsByYear[this.hoveredOrCurrentYear];
+    },
   },
 
   methods: {
@@ -169,7 +259,7 @@ export default {
       });
     },
 
-    // Автоматически находит и выбирает самый первый доступный прогноз
+    // автоматически находит и выбирает самый первый доступный прогноз
     selectFirstAvailableForecast() {
       if (this.forecasts && this.forecasts.length > 0) {
         const sortedForecasts = [...this.forecasts].sort((a, b) => {
@@ -209,8 +299,57 @@ export default {
       const dates = this.forecasts.map(f => new Date(f.forecast_start_date || f.date));
       this.minForecastDate = new Date(Math.min.apply(null, dates));
       this.maxForecastDate = new Date(Math.max.apply(null, dates));
-    }
+    },
+
+    getMonthName(monthIndex) {
+      const date = new Date(2000, monthIndex, 1);
+      return date.toLocaleString('en-US', { month: 'long' });
+    },
+
+    // управление кастомным дропдауном месяца/года
+    toggleMonthYearDropdown() {
+      this.dropdownOpen = !this.dropdownOpen;
+      if (!this.dropdownOpen) {
+        this.hoverYear = null;
+      }
+    },
+
+    selectYearFromDropdown(year) {
+      this.hoverYear = year;
+
+      // сразу переключаем текущий год
+      this.currentYear = year;
+
+      // если текущий месяц недоступен для этого года — выбираем первый доступный
+      const months = this.availableMonthsByYear[year] || [];
+      if (months.length > 0 && !months.includes(this.currentMonth)) {
+        this.currentMonth = months[0];
+      }
+    },
+
+    selectMonthFromDropdown(monthIndex) {
+      // устанавливаем месяц и год (учитывая hoverYear)
+      const targetYear = this.hoveredOrCurrentYear;
+      if (targetYear) {
+        this.currentYear = targetYear;
+      }
+      this.currentMonth = monthIndex;
+
+      this.dropdownOpen = false;
+      this.hoverYear = null;
+    },
+
+    handleClickOutside(event) {
+      if (!this.dropdownOpen) return;
+      const wrapper = this.$refs.monthYearWrapper;
+      if (wrapper && !wrapper.contains(event.target)) {
+        this.dropdownOpen = false;
+        this.hoverYear = null;
+      }
+    },
+  
   },
+
 
   watch: {
     forecasts: {
@@ -229,6 +368,8 @@ export default {
 </script>
 
 <style scoped>
+
+
 .calendar-container {
   width: 100%;
   max-width: 100%;
@@ -237,7 +378,6 @@ export default {
   border: 1px solid var(--border-color, #ddd);
   border-radius: var(--border-radius, 8px);
   padding: var(--spacing-lg, 20px);
-  /* box-shadow: var(--shadow, 0 2px 8px rgba(0, 0, 0, 0.1)); */
 }
 
 .calendar-container h2 {
@@ -253,34 +393,176 @@ export default {
   align-items: center;
   margin-bottom: var(--spacing-md, 16px);
   padding: 0 var(--spacing-xs, 8px);
+  gap: var(--spacing-xs, 8px);
+  flex-wrap: nowrap;
 }
 
-.month-year {
+.month-year-wrapper {
+  position: relative;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.month-year-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: var(--spacing-sm, 12px) var(--spacing-md, 16px);
+  font-size: var(--font-size-md, 1rem);
   font-family: 'Inter', sans-serif;
   font-weight: 700;
-  font-size: var(--font-size-lg, 1.125rem);
   color: #002033;
-  text-align: center;
-  flex: 1;
+  border-radius: 5px;
+  border: 1.5px solid white;
+  background-color: white;
+  cursor: pointer;
+  box-sizing: border-box;
+  min-width: 160px;
+  max-width: 220px;
+  height: 44px;
+  transition: 0.25s;
+}
+
+.calendar-container:hover .month-year-trigger:not(:hover):not(.dropdown-open) {
+  border-color: #dedede;
+  background-color: #fafafa;
+}
+
+.month-year-trigger.dropdown-open {
+  border-color: #007bff;
+}
+
+.month-year-trigger:hover {
+  border-color: #007bff;
+}
+
+
+.month-year-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.month-year-arrow {
+  font-size: 0.75rem;
+  color: #8a9aa5;
+}
+
+.month-year-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  padding: 8px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #d7dde3;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+  z-index: 10;
+  min-width: 260px;
+}
+
+.month-column,
+.year-column {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.month-column-title,
+.year-column-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7780;
+  padding: 4px 6px;
+}
+
+.current-month-button {
+  margin-top: 6px;
+  padding: 8px 10px;
+  background: #ffffff;
+  border: 1px solid #d7dde3;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: #002033;
+}
+
+.current-month-button:hover {
+  background: #f6f8fa;
+}
+
+.month-column {
+  min-width: 150px;
+}
+
+.year-column {
+  min-width: 80px;
+}
+
+.month-item,
+.year-item {
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: var(--font-size-sm, 0.875rem);
+  color: #002033;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
+}
+
+.month-item:hover,
+.year-item:hover {
+  background-color: #f0f2f5;
+}
+
+.month-item.active,
+.year-item.active {
+  background-color: #007bff;
+  color: #ffffff;
 }
 
 .nav-btn {
   background: none;
   border: none;
-  padding: var(--spacing-xs, 8px) var(--spacing-sm, 12px);
+  padding: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
-  min-width: 40px;
-  min-height: 40px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.nav-btn img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  flex-shrink: 0;
+  display: block;
 }
 
 .nav-btn:hover:not(:disabled) {
   background-color: rgb(229, 232, 236);
   border-radius: 5px;
   transform: scale(120%);
+}
+
+.nav-btn:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.nav-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.18);
 }
 
 .nav-btn:disabled {
@@ -382,14 +664,25 @@ export default {
     font-size: var(--font-size-lg, 1.125rem);
   }
 
-  .month-year {
-    font-size: var(--font-size-md, 1rem);
+  .month-select {
+    font-size: var(--font-size-sm, 0.875rem);
+    padding: var(--spacing-xs, 8px) var(--spacing-sm, 12px);
+    width: 105px;
+    height: 40px;
+  }
+
+  .year-select {
+    font-size: var(--font-size-sm, 0.875rem);
+    padding: var(--spacing-xs, 8px) var(--spacing-sm, 12px);
+    width: 75px;
+    height: 40px;
   }
 
   .nav-btn {
-    font-size: var(--font-size-md, 1rem);
-    min-width: 36px;
-    min-height: 36px;
+    min-width: 32px;
+    min-height: 32px;
+    max-width: 32px;
+    max-height: 32px;
   }
 
   .weekday, .calendar-day, .blank-day {
@@ -420,15 +713,26 @@ export default {
     margin-bottom: var(--spacing-sm, 12px);
   }
 
-  .month-year {
-    font-size: var(--font-size-sm, 0.875rem);
+  .month-select {
+    font-size: var(--font-size-xs, 0.75rem);
+    padding: var(--spacing-xs, 6px) var(--spacing-sm, 10px);
+    width: 90px;
+    height: 36px;
+  }
+
+  .year-select {
+    font-size: var(--font-size-xs, 0.75rem);
+    padding: var(--spacing-xs, 6px) var(--spacing-sm, 10px);
+    width: 65px;
+    height: 36px;
   }
 
   .nav-btn {
-    font-size: var(--font-size-sm, 0.875rem);
-    min-width: 40px;
-    min-height: 40px;
-    padding: var(--spacing-xs, 8px);
+    min-width: 32px;
+    min-height: 32px;
+    max-width: 32px;
+    max-height: 32px;
+    padding: var(--spacing-xs, 6px);
   }
 
   .weekday, .calendar-day, .blank-day {
@@ -459,15 +763,26 @@ export default {
     font-size: var(--font-size-sm, 0.875rem);
   }
 
-  .month-year {
+  .month-select {
     font-size: var(--font-size-xs, 0.75rem);
+    padding: var(--spacing-xs, 6px);
+    width: 80px;
+    height: 32px;
+  }
+
+  .year-select {
+    font-size: var(--font-size-xs, 0.75rem);
+    padding: var(--spacing-xs, 6px);
+    width: 60px;
+    height: 32px;
   }
 
   .nav-btn {
-    font-size: var(--font-size-xs, 0.75rem);
-    min-width: 36px;
-    min-height: 36px;
-    padding: var(--spacing-xs, 6px);
+    min-width: 28px;
+    min-height: 28px;
+    max-width: 28px;
+    max-height: 28px;
+    padding: var(--spacing-xs, 4px);
   }
 
   .weekday, .calendar-day, .blank-day {
@@ -503,4 +818,6 @@ export default {
     border-width: 2px;
   }
 }
+
+
 </style>
