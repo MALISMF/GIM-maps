@@ -1,9 +1,9 @@
 <template>
   <div class="model-list-container">
-    <h2>Доступные модели</h2>
+    <h2>Available models</h2>
     <div class="select-wrapper">
       <select v-model="selectedModel">
-        <option value="" disabled>Выберите модель</option>
+        <option value="" disabled>Select a model</option>
         <option v-for="model in models" :key="model" :value="model">{{ model }}</option>
       </select>
     </div>
@@ -27,20 +27,33 @@ export default {
       forecasts: []
     }
   },
-  
+
   methods: {
     async loadModels() {
-      const res = await axios.get('/gim-tec-forecast/models');
-      this.models = Array.isArray(res.data) ? res.data : (res.data.models || []);
-      if (this.models.length > 0) {
-        this.selectedModel = this.models[0];
+      try {
+        const res = await axios.get('https://services.simurg.space/gim-tec-forecast/models');
+        this.models = Array.isArray(res.data) ? res.data : (res.data.models || []);
+
+        // Set default model to "GIMini-LSTM-F10.7-7" if available, otherwise fallback to first model
+        const defaultModel = "GIMini-LSTM-F10.7-7";
+        if (this.models.includes(defaultModel)) {
+          this.selectedModel = defaultModel;
+        } else if (this.models.length > 0) {
+          this.selectedModel = this.models[0];
+        } else {
+          this.selectedModel = ''; // no models available
+        }
+      } catch (error) {
+        console.error('Failed to load models:', error);
+        this.models = [];
+        this.selectedModel = '';
       }
     },
     async refresh_forecasts(modelCode) {
       if (!modelCode) return;
       this.forecasts = [];
       try {
-        const res = await axios.get(`/gim-tec-forecast/get_forecasts/${modelCode}`);
+        const res = await axios.get(`https://services.simurg.space/gim-tec-forecast/get_forecasts/${modelCode}`);
         this.forecasts = Array.isArray(res.data) ? res.data : [];
         this.$emit('selected-model', modelCode);
         this.$emit('model-forecasts', this.forecasts);
@@ -50,28 +63,25 @@ export default {
       }
     }
   },
-  
+
   async mounted() {
     await this.loadModels();
   },
 
   watch: {
-    selectedModel: {
-      handler(newModel) {
-        if (newModel) {
-          this.refresh_forecasts(newModel);
-        }
-      },
-      immediate: true
+    selectedModel(newModel) {
+      if (newModel) {
+        this.refresh_forecasts(newModel);
+      }
     }
   },
 
   computed: {
     forecastCountText() {
       if (this.forecasts.length > 0) {
-        return `Найдено прогнозов: ${this.forecasts.length}`;
+        return `Forecasts found: ${this.forecasts.length}`;
       }
-      return 'Прогнозы для модели не найдены.';
+      return 'No predictions found for the model.';
     }
   }
 }
@@ -138,11 +148,11 @@ select:disabled {
   .model-list-container {
     padding: var(--spacing-md, 16px);
   }
-  
+
   .model-list-container h2 {
     font-size: var(--font-size-lg, 1.125rem);
   }
-  
+
   select {
     padding: var(--spacing-sm, 12px);
     font-size: var(--font-size-sm, 0.875rem);
@@ -154,18 +164,18 @@ select:disabled {
   .model-list-container {
     padding: var(--spacing-sm, 12px);
   }
-  
+
   .model-list-container h2 {
     font-size: var(--font-size-md, 1rem);
     margin-bottom: var(--spacing-sm, 12px);
   }
-  
+
   select {
     padding: var(--spacing-md, 16px);
     font-size: var(--font-size-md, 1rem);
     min-height: 48px; /* Увеличиваем высоту для touch */
   }
-  
+
   .forecast-count {
     font-size: var(--font-size-xs, 0.75rem);
     padding: var(--spacing-xs, 8px);
@@ -177,17 +187,17 @@ select:disabled {
   .model-list-container {
     padding: var(--spacing-xs, 8px);
   }
-  
+
   .model-list-container h2 {
     font-size: var(--font-size-sm, 0.875rem);
   }
-  
+
   select {
     padding: var(--spacing-sm, 12px);
     font-size: var(--font-size-sm, 0.875rem);
     min-height: 44px;
   }
-  
+
   .forecast-count {
     font-size: var(--font-size-xs, 0.75rem);
     padding: var(--spacing-xs, 8px);
@@ -199,7 +209,7 @@ select:disabled {
   select {
     min-height: 48px;
   }
-  
+
   .model-list-container {
     border-width: 2px;
   }

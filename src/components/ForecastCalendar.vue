@@ -1,5 +1,5 @@
 <template>
-  <h2>Доступные даты прогнозов</h2>
+  <h2>Available forecast dates</h2>
   <div class="calendar-container">
     <div class="calendar-header">
       <button @click="prevMonth" class="nav-btn" :disabled="!canGoPrev"><img src = "../assets/icons/Vector.svg"</button>
@@ -30,7 +30,7 @@ export default {
     }
   },
   emits: ['forecast-selected'],
-  
+
   data() {
     const today = new Date();
     return {
@@ -38,50 +38,50 @@ export default {
       selectedDate: null,
       currentMonth: today.getMonth(),
       currentYear: today.getFullYear(),
-      weekdays: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
+      // weekdays: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
       minForecastDate: null,
       maxForecastDate: null,
     };
   },
-  
+
   computed: {
     daysInMonth() {
       return new Date(this.currentYear, this.currentMonth + 1, 0).getDate();
     },
-    
+
     firstDayOfMonth() {
       let day = new Date(this.currentYear, this.currentMonth, 1).getDay();
       // Корректируем день недели: JS считает с ВС (0), нам нужен ПН (0)
       return day === 0 ? 6 : day - 1;
     },
-    
+
     blanks() {
       const blankCount = this.firstDayOfMonth;
       return Array.from({ length: blankCount }, (_, i) => i);
     },
-    
+
     monthYear() {
       const date = new Date(this.currentYear, this.currentMonth);
-      return `${date.toLocaleString('ru', { month: 'long' })} ${this.currentYear}`;
+      return `${date.toLocaleString('en-US', { month: 'long' })} ${this.currentYear}`;
     },
-    
+
     // Создает множество дат (в формате 'YYYY-MM-DD'), для которых есть прогнозы.
     // Используется для быстрой проверки доступности даты.
     availableDates() {
       if (!this.forecasts || !Array.isArray(this.forecasts)) {
         return new Set();
       }
-      
+
       const dates = new Set();
       this.forecasts.forEach(forecast => {
-        const dateStr = forecast.forecast_start_date || forecast.forecast_end_date || 
+        const dateStr = forecast.forecast_start_date || forecast.forecast_end_date ||
                        forecast.date || forecast.created_at || forecast.timestamp;
-        
+
         if (dateStr) {
           const date = new Date(dateStr);
           if (!isNaN(date.getTime())) {
-            const dateKey = date.getFullYear() + '-' + 
-                           String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+            const dateKey = date.getFullYear() + '-' +
+                           String(date.getMonth() + 1).padStart(2, '0') + '-' +
                            String(date.getDate()).padStart(2, '0');
             dates.add(dateKey);
           }
@@ -100,7 +100,7 @@ export default {
       return lastDayOfCurrentMonth < this.maxForecastDate;
     }
   },
-  
+
   methods: {
     prevMonth() {
       if (this.currentMonth === 0) {
@@ -110,7 +110,7 @@ export default {
         this.currentMonth--;
       }
     },
-    
+
     nextMonth() {
       if (this.currentMonth === 11) {
         this.currentMonth = 0;
@@ -119,19 +119,19 @@ export default {
         this.currentMonth++;
       }
     },
-    
+
     selectDate(day) {
       if (this.isDateAvailable(day)) {
         const clickedDate = new Date(this.currentYear, this.currentMonth, day);
         this.selectedDate = clickedDate;
-        
+
         const selectedForecast = this.findForecastForDate(clickedDate);
         if (selectedForecast) {
           this.$emit('forecast-selected', selectedForecast);
         }
       }
     },
-    
+
     isSelected(day) {
       if (!this.selectedDate) return false;
       return (
@@ -140,14 +140,14 @@ export default {
         this.selectedDate.getFullYear() === this.currentYear
       );
     },
-    
+
     isDateAvailable(day) {
-      const dateKey = this.currentYear + '-' + 
-                     String(this.currentMonth + 1).padStart(2, '0') + '-' + 
+      const dateKey = this.currentYear + '-' +
+                     String(this.currentMonth + 1).padStart(2, '0') + '-' +
                      String(day).padStart(2, '0');
       return this.availableDates.has(dateKey);
     },
-    
+
     getClassesForDay(day) {
       return [
         'calendar-day',
@@ -158,44 +158,44 @@ export default {
         }
       ];
     },
-    
+
     findForecastForDate(date) {
       return this.forecasts.find(forecast => {
         const forecastDate = new Date(
-          forecast.forecast_start_date || forecast.forecast_end_date || 
+          forecast.forecast_start_date || forecast.forecast_end_date ||
           forecast.date || forecast.created_at || forecast.timestamp
         );
         return forecastDate.toDateString() === date.toDateString();
       });
     },
-    
+
     // Автоматически находит и выбирает самый первый доступный прогноз
     selectFirstAvailableForecast() {
       if (this.forecasts && this.forecasts.length > 0) {
         const sortedForecasts = [...this.forecasts].sort((a, b) => {
           const dateA = new Date(
-            a.forecast_start_date || a.forecast_end_date || 
+            a.forecast_start_date || a.forecast_end_date ||
             a.date || a.created_at || a.timestamp
           );
           const dateB = new Date(
-            b.forecast_start_date || b.forecast_end_date || 
+            b.forecast_start_date || b.forecast_end_date ||
             b.date || b.created_at || b.timestamp
           );
           return dateA - dateB;
         });
-        
+
         const firstForecast = sortedForecasts[0];
         const firstDate = new Date(
-          firstForecast.forecast_start_date || firstForecast.forecast_end_date || 
+          firstForecast.forecast_start_date || firstForecast.forecast_end_date ||
           firstForecast.date || firstForecast.created_at || firstForecast.timestamp
         );
-        
+
         if (!isNaN(firstDate.getTime())) {
           this.selectedDate = firstDate;
-          
+
           this.currentMonth = firstDate.getMonth();
           this.currentYear = firstDate.getFullYear();
-          
+
           this.$emit('forecast-selected', firstForecast);
         }
       }
@@ -211,7 +211,7 @@ export default {
       this.maxForecastDate = new Date(Math.max.apply(null, dates));
     }
   },
-  
+
   watch: {
     forecasts: {
       handler(newForecasts) {
@@ -377,29 +377,29 @@ export default {
   .calendar-container {
     padding: var(--spacing-md, 16px);
   }
-  
+
   .calendar-container h2 {
     font-size: var(--font-size-lg, 1.125rem);
   }
-  
+
   .month-year {
     font-size: var(--font-size-md, 1rem);
   }
-  
+
   .nav-btn {
     font-size: var(--font-size-md, 1rem);
     min-width: 36px;
     min-height: 36px;
   }
-  
+
   .weekday, .calendar-day, .blank-day {
     height: 36px;
   }
-  
+
   .weekday {
     font-size: var(--font-size-xs, 0.75rem);
   }
-  
+
   .calendar-day {
     font-size: var(--font-size-xs, 0.75rem);
   }
@@ -410,39 +410,39 @@ export default {
   .calendar-container {
     padding: var(--spacing-sm, 12px);
   }
-  
+
   .calendar-container h2 {
     font-size: var(--font-size-md, 1rem);
     margin-bottom: var(--spacing-sm, 12px);
   }
-  
+
   .calendar-header {
     margin-bottom: var(--spacing-sm, 12px);
   }
-  
+
   .month-year {
     font-size: var(--font-size-sm, 0.875rem);
   }
-  
+
   .nav-btn {
     font-size: var(--font-size-sm, 0.875rem);
     min-width: 40px;
     min-height: 40px;
     padding: var(--spacing-xs, 8px);
   }
-  
+
   .weekday, .calendar-day, .blank-day {
     height: 40px;
   }
-  
+
   .weekday {
     font-size: var(--font-size-xs, 0.75rem);
   }
-  
+
   .calendar-day {
     font-size: var(--font-size-sm, 0.875rem);
   }
-  
+
   .calendar-day.selected.available::before {
     width: 32px;
     height: 32px;
@@ -454,34 +454,34 @@ export default {
   .calendar-container {
     padding: var(--spacing-xs, 8px);
   }
-  
+
   .calendar-container h2 {
     font-size: var(--font-size-sm, 0.875rem);
   }
-  
+
   .month-year {
     font-size: var(--font-size-xs, 0.75rem);
   }
-  
+
   .nav-btn {
     font-size: var(--font-size-xs, 0.75rem);
     min-width: 36px;
     min-height: 36px;
     padding: var(--spacing-xs, 6px);
   }
-  
+
   .weekday, .calendar-day, .blank-day {
     height: 32px;
   }
-  
+
   .weekday {
     font-size: var(--font-size-xs, 0.75rem);
   }
-  
+
   .calendar-day {
     font-size: var(--font-size-xs, 0.75rem);
   }
-  
+
   .calendar-day.selected.available::before {
     width: 24px;
     height: 24px;
@@ -494,11 +494,11 @@ export default {
     min-height: 44px;
     min-width: 44px;
   }
-  
+
   .calendar-day.clickable {
     min-height: 44px;
   }
-  
+
   .calendar-container {
     border-width: 2px;
   }
