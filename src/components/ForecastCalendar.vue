@@ -2,7 +2,7 @@
   <h2>Available forecast dates</h2>
   <div class="calendar-container">
     <div class="calendar-header">
-      <button @click="prevMonth" class="nav-btn" :disabled="!canGoPrev"><img src = "../assets/icons/Vector.svg"></button>
+      <button @click="prevMonth" class="nav-btn" :disabled="!canGoPrev"><img src = "../assets/icons/IconBackward.svg"></button>
 
       <div class="month-year-wrapper" ref="monthYearWrapper">
         <div class="month-year-trigger" :class="{ 'dropdown-open': dropdownOpen }" @click="toggleMonthYearDropdown">
