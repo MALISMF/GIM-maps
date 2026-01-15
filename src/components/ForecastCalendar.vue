@@ -12,8 +12,8 @@
           <span class="month-year-arrow">▼</span>
         </div>
 
-        <div v-if="dropdownOpen" class="month-year-dropdown">
-          <div class="month-column">
+        <div v-if="dropdownOpen" class="month-year-dropdown" :style="{ maxHeight: dropdownMaxHeight }">
+          <div class="month-column" :style="{ maxHeight: columnsMaxHeight }">
             <span class="month-column-title">Month</span>
             <div
               v-for="m in visibleMonths"
@@ -24,7 +24,7 @@
               {{ getMonthName(m) }}
             </div>
           </div>
-          <div class="year-column">
+          <div class="year-column" :style="{ maxHeight: columnsMaxHeight }">
             <span class="year-column-title">Year</span>
             <div
               v-for="y in availableYears"
@@ -80,16 +80,20 @@ export default {
       // кастомный дропдаун для месяца/года
       dropdownOpen: false,
       hoverYear: null,
+      dropdownMaxHeight: 'auto',
+      columnsMaxHeight: 'auto',
     };
   },
 
   mounted() {
     // Закрываем дропдаун при клике вне него
     document.addEventListener('click', this.handleClickOutside);
+    window.addEventListener('resize', this.updateDropdownHeight);
   },
 
   beforeUnmount() {
     document.removeEventListener('click', this.handleClickOutside);
+    window.removeEventListener('resize', this.updateDropdownHeight);
   },
 
   computed: {
@@ -347,6 +351,27 @@ export default {
         this.hoverYear = null;
       }
     },
+
+    updateDropdownHeight() {
+      if (!this.dropdownOpen || !this.$refs.monthYearWrapper) return;
+      
+      const trigger = this.$refs.monthYearWrapper.querySelector('.month-year-trigger');
+      if (!trigger) return;
+      
+      const triggerRect = trigger.getBoundingClientRect();
+      const dropdownBottomPosition = triggerRect.bottom;
+      const viewportHeight = window.innerHeight;
+      const availableHeight = viewportHeight - dropdownBottomPosition - 8; // 8px для отступа от низа
+      
+      // Устанавливаем max-height для dropdown
+      const dropdownHeight = Math.max(availableHeight, 200); // минимум 200px
+      this.dropdownMaxHeight = `${dropdownHeight}px`;
+      
+      // Устанавливаем max-height для колонок (отнимаем высоту заголовков и padding)
+      const headerHeight = 30; // примерная высота заголовка + padding
+      const columnsHeight = dropdownHeight - headerHeight;
+      this.columnsMaxHeight = `${Math.max(columnsHeight, 150)}px`;
+    },
   
   },
 
@@ -362,6 +387,11 @@ export default {
         }
       },
       immediate: true
+    },
+    dropdownOpen(newVal) {
+      if (newVal) {
+        this.$nextTick(() => this.updateDropdownHeight());
+      }
     }
   }
 };
@@ -471,7 +501,12 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  
+  padding-right: 2px;
 }
+
 
 .month-column-title,
 .year-column-title {
