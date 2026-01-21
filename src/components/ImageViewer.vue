@@ -37,40 +37,85 @@ export default {
       currentImage: null,
       isImageLoading: false,
       imageError: null,
-      baseUrl: 'https://services.simurg.space/gim-tec-forecast'
+      baseUrl: 'https://services.simurg.space/gim-tec-forecast',
+      currentRequestShift: null, // Отслеживаем актуальный shift для текущего запроса
+      debounceTimer: null // Таймер для debounce
     };
   },
   watch: {
     selectedShift: {
       handler(newShift) {
-        this.loadImage(newShift);
+        this.debouncedLoadImage(newShift);
       },
       immediate: true
     }
   },
+  beforeUnmount() {
+    // Очищаем таймер при размонтировании компонента
+    if (this.debounceTimer) {
+      clearTimeout(this.debounceTimer);
+    }
+  },
   methods: {
+    debouncedLoadImage(shift) {
+      // Очищаем предыдущий таймер, если он есть
+      if (this.debounceTimer) {
+        clearTimeout(this.debounceTimer);
+      }
+      
+      // Если это первая загрузка (immediate: true), загружаем сразу
+      if (this.currentImage === null && this.currentRequestShift === null) {
+        this.loadImage(shift);
+        return;
+      }
+      
+      // Для последующих изменений используем debounce с задержкой 300ms
+      this.debounceTimer = setTimeout(() => {
+        this.loadImage(shift);
+        this.debounceTimer = null;
+      }, 500);
+    },
+    
     async loadImage(shift) {
       if (!this.forecastId) return;
+      
+      // Сохраняем shift текущего запроса
+      this.currentRequestShift = shift;
+      
       this.isImageLoading = true;
       this.imageError = null;
+      
       try {
         const imageUrl = `${this.baseUrl}/get_forecast_image/${this.forecastId}?shift=${shift}`;
         const img = new Image();
+        
         img.onload = () => {
-          this.currentImage = imageUrl;
-          this.isImageLoading = false;
-          this.$emit('image-loaded');
+          // Проверяем, что это еще актуальный запрос (не был запущен новый)
+          if (this.currentRequestShift === shift) {
+            this.currentImage = imageUrl;
+            this.isImageLoading = false;
+            this.$emit('image-loaded');
+          }
+          // Иначе просто игнорируем - уже загружается другое изображение
         };
+        
         img.onerror = () => {
-          this.imageError = 'Не удалось загрузить изображение.';
-          this.isImageLoading = false;
-          this.$emit('image-error', this.imageError);
+          // Проверяем актуальность запроса
+          if (this.currentRequestShift === shift) {
+            this.imageError = 'Не удалось загрузить изображение.';
+            this.isImageLoading = false;
+            this.$emit('image-error', this.imageError);
+          }
         };
+        
         img.src = `${imageUrl}&t=${Date.now()}`;
       } catch (error) {
-        this.imageError = 'Произошла критическая ошибка.';
-        this.isImageLoading = false;
-        this.$emit('image-error', this.imageError);
+        // Проверяем актуальность запроса
+        if (this.currentRequestShift === shift) {
+          this.imageError = 'Произошла критическая ошибка.';
+          this.isImageLoading = false;
+          this.$emit('image-error', this.imageError);
+        }
       }
     }
   }
