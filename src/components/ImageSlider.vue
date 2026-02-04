@@ -236,7 +236,8 @@ export default {
   position: relative;
   width: 100%;
   height: 40px;
-  background-color: #e0e0e0;
+  background-color: #eeeeee;
+  border: 1px solid #dadada;
   border-radius: 8px;
   cursor: pointer;
   box-sizing: border-box;
@@ -265,6 +266,16 @@ export default {
   justify-content: center;
   min-width: 60px;
 }
+
+.slider-thumb:hover {
+  transform: translate(-50%, -50%) scale(1.05);
+  background-color: #2491ff;
+}
+
+.slider-thumb:active {
+  background-color: var(--primary-color);
+}
+
 
 .thumb-label {
   color: white;
