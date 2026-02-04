@@ -155,6 +155,7 @@ export default {
 
     onImageLoaded() {
       this.isPanelLoading = false;
+      this.error = null; 
     },
 
     onImageError(error) {
