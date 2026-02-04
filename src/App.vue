@@ -245,6 +245,7 @@ body {
 
 .left-panel {
   flex: 1 1 320px;
+  height: fit-content;
   min-width: 0;
   width: 100%;
   box-sizing: border-box;
